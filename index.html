@@ -156,7 +156,7 @@ layout: default
 
 .news-item {
   background: var(--card); border: 1px solid var(--border); border-radius: 12px;
-  overflow: hidden; text-decoration: none; color: inherit; display: block;
+  overflow: hidden; cursor: pointer; display: block;
   transition: border-color 0.2s, transform 0.15s;
 }
 .news-item:hover { border-color: #5865f2; transform: translateY(-2px); }
@@ -181,6 +181,43 @@ layout: default
   font-size: 40px; background: linear-gradient(135deg, #1b2838, #2a475e);
 }
 
+/* News Modal */
+.news-modal-overlay {
+  display: none; position: fixed; inset: 0; z-index: 1000;
+  background: rgba(0,0,0,0.75); backdrop-filter: blur(4px);
+  align-items: center; justify-content: center; padding: 16px;
+}
+.news-modal-overlay.open { display: flex; }
+.news-modal {
+  background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+  max-width: 600px; width: 100%; max-height: 90vh; overflow-y: auto;
+  position: relative;
+}
+.news-modal-img { width: 100%; height: 220px; object-fit: cover; display: block; border-radius: 16px 16px 0 0; }
+.news-modal-no-img {
+  height: 120px; display: flex; align-items: center; justify-content: center;
+  font-size: 48px; background: linear-gradient(135deg, #1b2838, #2a475e);
+  border-radius: 16px 16px 0 0;
+}
+.news-modal-body { padding: 20px 24px 24px; }
+.news-modal-title { font-size: 18px; font-weight: 800; line-height: 1.4; margin-bottom: 10px; color: var(--text); }
+.news-modal-meta { font-size: 12px; color: var(--muted); margin-bottom: 14px; }
+.news-modal-desc { font-size: 14px; color: var(--muted); line-height: 1.7; margin-bottom: 20px; }
+.news-modal-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.news-modal-steam {
+  padding: 10px 18px; border-radius: 8px; font-size: 13px; font-weight: 700;
+  background: #1b2838; color: #c7d5e0; border: 1px solid #4c6b22;
+  text-decoration: none; transition: background 0.2s;
+}
+.news-modal-steam:hover { background: #2a475e; }
+.news-modal-close {
+  position: absolute; top: 12px; right: 14px;
+  background: rgba(0,0,0,0.5); border: none; color: #fff;
+  width: 32px; height: 32px; border-radius: 50%; font-size: 18px;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  z-index: 10; line-height: 1;
+}
+
 .home-skeleton { background: var(--border); border-radius: 12px; animation: pulse 1.5s ease-in-out infinite; }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
 .home-loading { text-align: center; padding: 60px; color: var(--muted); }
@@ -198,7 +235,7 @@ layout: default
   <div class="home-section">
     <div class="home-section-header">
       <div class="home-section-title">🔥 Одоогийн хямдрал</div>
-      <a class="home-see-all" href="{{ '/deals.html' | relative_url }}">Бүгдийг харах →</a>
+      <a class="home-see-all" href="{{ '/deals/' | relative_url }}">Бүгдийг харах →</a>
     </div>
     <div id="deals-grid" class="deals-grid">
       {% for i in (1..6) %}
@@ -220,7 +257,7 @@ layout: default
   </div>
 
   <!-- DAILY CHALLENGE BANNER -->
-  <a class="daily-banner" href="{{ '/daily.html' | relative_url }}">
+  <a class="daily-banner" href="{{ '/daily/' | relative_url }}">
     <div class="daily-banner-icon">🎯</div>
     <div class="daily-banner-info">
       <div class="daily-banner-title">Өдрийн Challenge</div>
@@ -230,7 +267,7 @@ layout: default
   </a>
 
   <!-- PROFILE BANNER -->
-  <a class="profile-banner" href="{{ '/steam.html' | relative_url }}">
+  <a class="profile-banner" href="{{ '/steam/' | relative_url }}">
     <div class="profile-banner-icon">🎮</div>
     <div class="profile-banner-info">
       <div class="profile-banner-title">Steam Профайл харах</div>
@@ -266,7 +303,7 @@ layout: default
   <div class="home-section">
     <div class="home-section-header">
       <div class="home-section-title">✨ Шинэ тоглоомууд</div>
-      <a class="home-see-all" href="{{ '/calendar.html' | relative_url }}">Хуанли →</a>
+      <a class="home-see-all" href="{{ '/calendar/' | relative_url }}">Хуанли →</a>
     </div>
     <div id="new-grid" class="new-grid">
       {% for i in (1..4) %}
@@ -277,6 +314,14 @@ layout: default
 
 </div>
 </main>
+
+<!-- News Modal -->
+<div class="news-modal-overlay" id="news-modal-overlay" onclick="closeNewsModal(event)">
+  <div class="news-modal" id="news-modal">
+    <button class="news-modal-close" onclick="closeNewsModal()">✕</button>
+    <div id="news-modal-content"></div>
+  </div>
+</div>
 
 <script>
 const WORKER_URL = 'https://respawnmn-steam-api.tsekseven69.workers.dev'
@@ -322,14 +367,17 @@ async function loadNews() {
   }
 }
 
+let newsData = []
+
 function renderNews(news) {
+  newsData = news
   const feed = document.getElementById('news-feed')
   if (!news.length) {
     feed.innerHTML = '<div style="color:var(--muted);grid-column:1/-1;text-align:center;padding:20px;">Мэдээ байхгүй байна</div>'
     return
   }
 
-  feed.innerHTML = news.slice(0, 6).map(n => {
+  feed.innerHTML = news.slice(0, 6).map((n, i) => {
     const date = n.date ? new Date(n.date).toLocaleDateString('mn-MN', { month: 'short', day: 'numeric' }) : ''
     const title = esc(n.titleMn || n.title)
     const desc = esc(n.descMn || n.description || '')
@@ -339,7 +387,7 @@ function renderNews(news) {
       : `<div class="news-item-no-img">📰</div>`
 
     return `
-    <a class="news-item" href="${n.link || '#'}" target="_blank" rel="noopener">
+    <div class="news-item" onclick="openNewsModal(${i})">
       ${imgHtml}
       <div class="news-item-body">
         <div class="news-item-title">${title}</div>
@@ -349,9 +397,42 @@ function renderNews(news) {
           <span class="news-item-orig">${orig}</span>
         </div>
       </div>
-    </a>`
+    </div>`
   }).join('')
 }
+
+function openNewsModal(idx) {
+  const n = newsData[idx]
+  if (!n) return
+  const date = n.date ? new Date(n.date).toLocaleDateString('mn-MN', { year: 'numeric', month: 'long', day: 'numeric' }) : ''
+  const title = esc(n.titleMn || n.title)
+  const desc = esc(n.descMn || n.description || '')
+  const imgHtml = n.image
+    ? `<img class="news-modal-img" src="${n.image}" alt="" onerror="this.outerHTML='<div class=\\'news-modal-no-img\\'>📰</div>'">`
+    : `<div class="news-modal-no-img">📰</div>`
+  const steamBtn = n.link
+    ? `<a class="news-modal-steam" href="${n.link}" target="_blank" rel="noopener">🔗 Эх сурвалж харах</a>`
+    : ''
+
+  document.getElementById('news-modal-content').innerHTML = `
+    ${imgHtml}
+    <div class="news-modal-body">
+      <div class="news-modal-title">${title}</div>
+      <div class="news-modal-meta">${date}</div>
+      <div class="news-modal-desc">${desc}</div>
+      <div class="news-modal-actions">${steamBtn}</div>
+    </div>`
+  document.getElementById('news-modal-overlay').classList.add('open')
+  document.body.style.overflow = 'hidden'
+}
+
+function closeNewsModal(e) {
+  if (e && e.target !== document.getElementById('news-modal-overlay') && !e.target.classList.contains('news-modal-close')) return
+  document.getElementById('news-modal-overlay').classList.remove('open')
+  document.body.style.overflow = ''
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { document.getElementById('news-modal-overlay').classList.remove('open'); document.body.style.overflow = '' } })
 
 function renderHero(specials) {
   if (!specials || !specials.length) {
