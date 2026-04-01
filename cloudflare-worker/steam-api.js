@@ -201,19 +201,30 @@ export default {
         return json({ games })
 
       } else if (action === 'topgames') {
-        const res = await fetch('https://steamspy.com/api.php?request=top100in2weeks', {
+        const chartsRes = await fetch('https://api.steampowered.com/ISteamChartsService/GetMostPlayedGames/v1/', {
           headers: { 'User-Agent': 'RespawnMN/1.0' },
         })
-        const data = await res.json()
-        const games = Object.values(data).slice(0, 20).map(g => ({
-          appid: g.appid,
-          name: g.name,
-          players2weeks: g.players_2weeks || 0,
-          avgHours: Math.round((g.average_2weeks || 0) / 60 * 10) / 10,
-          score: (g.positive && g.negative)
-            ? Math.round(g.positive / (g.positive + g.negative) * 100)
-            : null,
-          image: `https://cdn.cloudflare.steamstatic.com/steam/apps/${g.appid}/capsule_231x87.jpg`,
+        const chartsData = await chartsRes.json()
+        const ranks = (chartsData.response?.ranks || []).slice(0, 20)
+
+        const appids = ranks.map(r => r.appid).join(',')
+        let nameMap = {}
+        try {
+          const detailsRes = await fetch(`${STORE_BASE}/api/appdetails?appids=${appids}&filters=basic`, {
+            headers: { 'User-Agent': 'RespawnMN/1.0' },
+          })
+          const detailsData = await detailsRes.json()
+          for (const r of ranks) {
+            nameMap[r.appid] = detailsData[r.appid]?.data?.name || ''
+          }
+        } catch (_) {}
+
+        const games = ranks.map(r => ({
+          appid: r.appid,
+          name: nameMap[r.appid] || `App ${r.appid}`,
+          peakPlayers: r.peak_in_game || 0,
+          lastWeekRank: r.last_week_rank || 0,
+          image: `https://cdn.cloudflare.steamstatic.com/steam/apps/${r.appid}/header.jpg`,
         }))
         return json({ games, updated: new Date().toISOString() })
 
