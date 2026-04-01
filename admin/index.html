@@ -94,6 +94,9 @@ header { background: var(--bg2); border-bottom: 0.5px solid var(--border); paddi
 
 /* PREVIEW */
 .preview-box { background: var(--bg2); border: 0.5px solid var(--border); border-radius: 10px; padding: 16px; font-family: monospace; font-size: 12px; color: var(--muted); white-space: pre-wrap; word-break: break-all; max-height: 300px; overflow-y: auto; margin-top: 16px; display: none; }
+.upload-area { background: var(--bg3); border: 1.5px dashed var(--border); border-radius: 12px; padding: 32px; text-align: center; cursor: pointer; transition: border-color 0.15s; min-height: 140px; display: flex; align-items: center; justify-content: center; }
+.upload-area:hover { border-color: var(--blue); }
+.upload-area img { max-height: 200px; max-width: 100%; border-radius: 8px; object-fit: contain; }
 </style>
 </head>
 <body>
@@ -127,6 +130,7 @@ header { background: var(--bg2); border-bottom: 0.5px solid var(--border); paddi
   <div class="tabs">
     <button class="tab active" onclick="showTab('mn', this)">📝 Монгол мэдээ</button>
     <button class="tab" onclick="showTab('en', this)">🌐 Англиас орчуулах</button>
+    <button class="tab" onclick="showTab('meme', this)">😂 Meme</button>
     <button class="tab" onclick="showTab('settings', this)">⚙️ Тохиргоо</button>
   </div>
 
@@ -229,6 +233,44 @@ header { background: var(--bg2); border-bottom: 0.5px solid var(--border); paddi
       </div>
     </div>
 
+    <!-- TAB: MEME -->
+    <div class="panel" id="panel-meme">
+      <div class="field">
+        <label>Зураг оруулах</label>
+        <div class="upload-area" id="upload-area" onclick="document.getElementById('meme-file').click()">
+          <div id="upload-preview">
+            <div style="font-size:32px;margin-bottom:8px;">🖼️</div>
+            <div style="font-size:13px;color:var(--muted);">Зураг дарж сонгоно уу</div>
+            <div style="font-size:11px;color:var(--dim);margin-top:4px;">JPG, PNG, GIF, WEBP · Дээд тал 5MB</div>
+          </div>
+        </div>
+        <input type="file" id="meme-file" accept="image/*" style="display:none" onchange="handleMemeImage(this)">
+      </div>
+      <div class="field">
+        <label>Emoji (зураг байхгүй үед)</label>
+        <input type="text" id="meme-emoji" placeholder="😂" maxlength="4" style="font-size:24px;text-align:center;width:80px;">
+      </div>
+      <div class="field">
+        <label>Тайлбар</label>
+        <input type="text" id="meme-caption" placeholder="Meme-ийн тайлбар...">
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Анхны like тоо</label>
+          <input type="text" id="meme-likes" placeholder="0" value="0">
+        </div>
+        <div class="field">
+          <label>Огноо</label>
+          <input type="date" id="meme-date">
+        </div>
+      </div>
+      <div class="action-bar">
+        <button class="btn-secondary" onclick="clearMemeForm()">Цэвэрлэх</button>
+        <button class="btn-primary" id="meme-submit" onclick="submitMeme()">Meme нэмэх →</button>
+        <div class="status" id="meme-status"></div>
+      </div>
+    </div>
+
     <!-- TAB: SETTINGS -->
     <div class="panel" id="panel-settings">
       <div class="settings-section">
@@ -327,6 +369,7 @@ function showApp() {
   const today = new Date().toISOString().split('T')[0]
   document.getElementById('mn-date').value = today
   document.getElementById('en-date').value = today
+  document.getElementById('meme-date').value = today
 }
 
 // Check session
@@ -525,6 +568,121 @@ async function submitEn() {
     setStatus(statusEl, 'success', '✅ GitHub Actions эхэллээ. Орчуулж дуусаад автоматаар нийтлэгдэнэ (~3-5 мин)')
     document.getElementById('en-title').value = ''
     document.getElementById('en-body').value = ''
+  } catch (e) {
+    setStatus(statusEl, 'error', '❌ ' + e.message)
+  } finally {
+    btn.disabled = false
+  }
+}
+
+// --- Meme ---
+let memeImageB64 = ''
+let memeImageExt = ''
+
+function handleMemeImage(input) {
+  const file = input.files[0]
+  if (!file) return
+  if (file.size > 5 * 1024 * 1024) { alert('Файл 5MB-аас их байж болохгүй'); return }
+
+  memeImageExt = file.name.split('.').pop().toLowerCase()
+  const reader = new FileReader()
+  reader.onload = e => {
+    memeImageB64 = e.target.result.split(',')[1]
+    const preview = document.getElementById('upload-preview')
+    preview.innerHTML = `<img src="${e.target.result}" style="max-height:200px;max-width:100%;border-radius:8px;object-fit:contain;">`
+  }
+  reader.readAsDataURL(file)
+}
+
+function clearMemeForm() {
+  memeImageB64 = ''
+  memeImageExt = ''
+  document.getElementById('meme-file').value = ''
+  document.getElementById('upload-preview').innerHTML = `
+    <div style="font-size:32px;margin-bottom:8px;">🖼️</div>
+    <div style="font-size:13px;color:var(--muted);">Зураг дарж сонгоно уу</div>
+    <div style="font-size:11px;color:var(--dim);margin-top:4px;">JPG, PNG, GIF, WEBP · Дээд тал 5MB</div>`
+  document.getElementById('meme-emoji').value = ''
+  document.getElementById('meme-caption').value = ''
+  document.getElementById('meme-likes').value = '0'
+  document.getElementById('meme-status').className = 'status'
+  document.getElementById('meme-status').innerHTML = ''
+}
+
+async function fetchMemesJson() {
+  const token = localStorage.getItem(STORAGE.TOKEN)
+  const repo = localStorage.getItem(STORAGE.REPO)
+  const url = `https://api.github.com/repos/${repo}/contents/_data/memes.json`
+  const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } })
+  if (!res.ok) throw new Error('memes.json уншиж чадсангүй')
+  const data = await res.json()
+  const content = JSON.parse(decodeURIComponent(escape(atob(data.content.replace(/\n/g, '')))))
+  return { memes: content, sha: data.sha }
+}
+
+async function submitMeme() {
+  const caption = document.getElementById('meme-caption').value.trim()
+  const emoji = document.getElementById('meme-emoji').value.trim() || '😂'
+  const likes = document.getElementById('meme-likes').value.trim() || '0'
+  const date = document.getElementById('meme-date').value || new Date().toISOString().split('T')[0]
+  const statusEl = document.getElementById('meme-status')
+  const btn = document.getElementById('meme-submit')
+
+  if (!caption) { alert('Тайлбар оруулна уу'); return }
+
+  btn.disabled = true
+  setStatus(statusEl, 'loading', 'Нэмж байна...')
+
+  try {
+    const thumbs = ['a', 'b', 'c', 'd']
+    let imagePath = ''
+
+    // 1. Upload image if present
+    if (memeImageB64) {
+      setStatus(statusEl, 'loading', 'Зураг upload хийж байна...')
+      const ts = Date.now()
+      const imgFilename = `assets/memes/${ts}.${memeImageExt}`
+      const token = localStorage.getItem(STORAGE.TOKEN)
+      const repo = localStorage.getItem(STORAGE.REPO)
+
+      const imgRes = await fetch(`https://api.github.com/repos/${repo}/contents/${imgFilename}`, {
+        method: 'PUT',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: `meme: upload image ${ts}`, content: memeImageB64, branch: 'main' })
+      })
+      if (!imgRes.ok) throw new Error('Зураг upload амжилтгүй')
+      imagePath = '/' + imgFilename
+    }
+
+    // 2. Fetch current memes.json
+    setStatus(statusEl, 'loading', 'Жагсаалт шинэчилж байна...')
+    const { memes, sha } = await fetchMemesJson()
+
+    // 3. Prepend new meme
+    const newMeme = {
+      emoji,
+      image: imagePath,
+      caption,
+      likes,
+      date,
+      thumb: thumbs[memes.length % 4]
+    }
+    memes.unshift(newMeme)
+
+    // 4. Commit updated memes.json
+    const token = localStorage.getItem(STORAGE.TOKEN)
+    const repo = localStorage.getItem(STORAGE.REPO)
+    const newContent = btoa(unescape(encodeURIComponent(JSON.stringify(memes, null, 2))))
+
+    const commitRes = await fetch(`https://api.github.com/repos/${repo}/contents/_data/memes.json`, {
+      method: 'PUT',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: `meme: ${caption.slice(0, 60)}`, content: newContent, sha, branch: 'main' })
+    })
+    if (!commitRes.ok) throw new Error('memes.json хадгалж чадсангүй')
+
+    setStatus(statusEl, 'success', '✅ Meme нэмэгдлээ! (~2 мин дараа сайтад гарна)')
+    clearMemeForm()
   } catch (e) {
     setStatus(statusEl, 'error', '❌ ' + e.message)
   } finally {

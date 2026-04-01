@@ -97,46 +97,27 @@ layout: default
       <div class="see-all">Бүгдийг харах →</div>
     </div>
     <div class="meme-grid">
+      {% assign mthumb_list = "a,b,c,d" | split: "," %}
+      {% for meme in site.data.memes limit: 4 %}
+      {% assign mthumb_idx = forloop.index0 | modulo: 4 %}
+      {% assign mthumb = mthumb_list[mthumb_idx] %}
       <div class="meme-card">
-        <div class="meme-thumb meme-thumb-a">🌙</div>
+        {% if meme.image and meme.image != "" %}
+        <div class="meme-thumb" style="padding:0;">
+          <img src="{{ meme.image | relative_url }}" alt="meme" style="width:100%;height:100%;object-fit:cover;display:block;">
+        </div>
+        {% else %}
+        <div class="meme-thumb meme-thumb-{{ mthumb }}">{{ meme.emoji }}</div>
+        {% endif %}
         <div class="meme-body">
-          <div class="meme-title">Шөнийн 2 цагт "нэг дор дуусгана" гэж байсан чинь...</div>
+          <div class="meme-title">{{ meme.caption }}</div>
           <div class="meme-footer">
-            <button class="like-btn" onclick="like(this)">❤️ <span>1.2к</span></button>
-            <span class="time-text">2 цаг</span>
+            <button class="like-btn" onclick="like(this)">❤️ <span>{{ meme.likes }}</span></button>
+            <span class="time-text" data-date="{{ meme.date }}">{{ meme.date }}</span>
           </div>
         </div>
       </div>
-      <div class="meme-card">
-        <div class="meme-thumb meme-thumb-b">💸</div>
-        <div class="meme-body">
-          <div class="meme-title">Steam хямдрал vs Хоолны мөнгө</div>
-          <div class="meme-footer">
-            <button class="like-btn" onclick="like(this)">❤️ <span>3.4к</span></button>
-            <span class="time-text">5 цаг</span>
-          </div>
-        </div>
-      </div>
-      <div class="meme-card">
-        <div class="meme-thumb meme-thumb-c">😤</div>
-        <div class="meme-body">
-          <div class="meme-title">Solo queue-д орох үеийн сэтгэлзүй</div>
-          <div class="meme-footer">
-            <button class="like-btn" onclick="like(this)">❤️ <span>891</span></button>
-            <span class="time-text">8 цаг</span>
-          </div>
-        </div>
-      </div>
-      <div class="meme-card">
-        <div class="meme-thumb meme-thumb-d">🏆</div>
-        <div class="meme-body">
-          <div class="meme-title">Achievement unlock хийхэд гэр бүлийн хүн харах</div>
-          <div class="meme-footer">
-            <button class="like-btn" onclick="like(this)">❤️ <span>2.1к</span></button>
-            <span class="time-text">1 өдөр</span>
-          </div>
-        </div>
-      </div>
+      {% endfor %}
     </div>
   </div>
 
