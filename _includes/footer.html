@@ -1,0 +1,36 @@
+<footer>
+  <div class="footer-logo">Respawn<span>MN</span></div>
+  <div class="footer-text">Монгол геймерүүдийн мэдээ, meme, quiz нэг дор</div>
+  <div class="footer-links">
+    <span class="footer-link">Бидний тухай</span>
+    <span class="footer-link">Холбоо барих</span>
+    <span class="footer-link">Нууцлалын бодлого</span>
+    <span class="footer-link">Facebook</span>
+    <span class="footer-link">Discord</span>
+  </div>
+</footer>
+
+<nav class="bottom-nav">
+  <div class="bottom-nav-inner">
+    <button class="bottom-nav-item{% unless page.quiz %} active{% endunless %}" onclick="bottomNavClick(this)">
+      <span class="bn-icon">📰</span>
+      <span class="bn-label">Мэдээ</span>
+    </button>
+    <button class="bottom-nav-item{% if page.quiz %} active{% endif %}" onclick="window.location.href='{{ \"/quiz.html\" | relative_url }}'">
+      <span class="bn-icon">🎮</span>
+      <span class="bn-label">Quiz</span>
+    </button>
+    <button class="bottom-nav-item" onclick="bottomNavClick(this)">
+      <span class="bn-icon">😂</span>
+      <span class="bn-label">Meme</span>
+    </button>
+    <button class="bottom-nav-item" onclick="bottomNavClick(this)">
+      <span class="bn-icon">⭐</span>
+      <span class="bn-label">Review</span>
+    </button>
+    <button class="bottom-nav-item" onclick="bottomNavClick(this)">
+      <span class="bn-icon">🏆</span>
+      <span class="bn-label">Esports</span>
+    </button>
+  </div>
+</nav>

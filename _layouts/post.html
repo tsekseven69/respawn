@@ -1,0 +1,23 @@
+---
+layout: default
+---
+
+<main>
+  <div class="post-wrap">
+    <a class="post-back" href="{{ '/' | relative_url }}">← Нүүр хуудас</a>
+    <div class="post-header">
+      <span class="badge {{ page.badge | default: 'badge-blue' }}">{{ page.category | default: 'Мэдээ' }}</span>
+      <h1 class="post-title">{{ page.title }}</h1>
+      <div class="hero-meta" style="padding:0; border:none; margin-bottom:24px;">
+        <span class="time-text" data-date="{{ page.date | date_to_xmlschema }}">{{ page.date | date: "%Y-%m-%d" }}</span>
+        {% if page.translated %}<span class="badge badge-purple" style="margin-left:auto;">🤖 Орчуулсан</span>{% endif %}
+      </div>
+    </div>
+    <div class="post-content">
+      {{ content }}
+    </div>
+    <div style="margin-top:40px; padding-top:20px; border-top:0.5px solid var(--border);">
+      <a class="post-back" href="{{ '/' | relative_url }}">← Бүх мэдээ харах</a>
+    </div>
+  </div>
+</main>

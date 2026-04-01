@@ -1,93 +1,54 @@
-<!DOCTYPE html>
-<html lang="mn">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="theme-color" content="#111114">
-  <link rel="icon" type="image/x-icon" href="/favicon.ico">
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-  <title>RespawnMN — Монгол Gaming Сайт</title>
-</head>
-<body>
+---
+layout: default
+---
 
-<nav>
-  <div class="logo">Respawn<span>MN</span></div>
-  <div class="nav-links">
-    <button class="nav-link active" onclick="setActive(this)">Мэдээ</button>
-    <button class="nav-link" onclick="setActive(this)">Quiz</button>
-    <button class="nav-link" onclick="setActive(this)">Meme</button>
-    <button class="nav-link" onclick="setActive(this)">Review</button>
-    <button class="nav-link" onclick="setActive(this)">Esports</button>
-  </div>
-  <div class="nav-right">
-    <input class="search" type="text" placeholder="🔍  Хайх...">
-    <div class="notif-btn">🔔</div>
-    <button class="theme-btn" id="theme-btn" onclick="toggleTheme()" title="Өнгөний горим">☀️</button>
-    <button class="hamburger" id="hamburger" onclick="toggleMobileMenu()" aria-label="Цэс">
-      <span></span><span></span><span></span>
-    </button>
-  </div>
-</nav>
-
-<div class="mobile-menu" id="mobile-menu">
-  <button class="nav-link active" onclick="setActive(this)">Мэдээ</button>
-  <button class="nav-link" onclick="setActive(this)">Quiz</button>
-  <button class="nav-link" onclick="setActive(this)">Meme</button>
-  <button class="nav-link" onclick="setActive(this)">Review</button>
-  <button class="nav-link" onclick="setActive(this)">Esports</button>
-</div>
+{% assign featured = site.posts | where: "featured", true | first %}
+{% unless featured %}{% assign featured = site.posts.first %}{% endunless %}
 
 <main>
 
   <!-- HERO -->
   <div class="hero">
     <div class="hero-main">
+      {% if featured %}
+      <a href="{{ featured.url | relative_url }}" style="text-decoration:none;">
+      {% endif %}
       <div class="hero-img">
         <div style="position:relative;">
           <div class="hero-badge">🔥 Онцлох</div>
-          <div class="hero-title">GTA VI — Монгол геймерүүдэд юу санагдав?</div>
-          <div class="hero-sub">Дэлхийн хамгийн их хүлээгдсэн тоглоом эцэст нь гарлаа</div>
+          <div class="hero-title">{% if featured %}{{ featured.title }}{% else %}GTA VI — Монгол геймерүүдэд юу санагдав?{% endif %}</div>
+          <div class="hero-sub">{% if featured %}{{ featured.excerpt | strip_html | truncate: 90 }}{% else %}Дэлхийн хамгийн их хүлээгдсэн тоглоом эцэст нь гарлаа{% endif %}</div>
         </div>
       </div>
       <div class="hero-meta">
-        <span class="badge badge-blue">Мэдээ</span>
-        <span class="badge badge-purple">Quiz бий</span>
-        <span class="time-text" style="margin-left:auto">2 цагийн өмнө</span>
+        <span class="badge {{ featured.badge | default: 'badge-blue' }}">{{ featured.category | default: 'Мэдээ' }}</span>
+        <span class="time-text" style="margin-left:auto" data-date="{{ featured.date | date_to_xmlschema }}">{{ featured.date | date: "%Y-%m-%d" }}</span>
       </div>
+      {% if featured %}</a>{% endif %}
     </div>
 
     <div class="sidebar">
       <div class="side-label">Trending</div>
-      <div class="side-card">
-        <div class="side-thumb side-thumb-a"></div>
-        <div class="side-info">
-          <div class="side-title">Elden Ring DLC — Worth it үү?</div>
-          <div class="side-meta">
-            <span class="badge badge-blue">Review</span>
-            <span class="time-text">5 цаг</span>
+      {% assign thumb_letters = "a,b,c" | split: "," %}
+      {% assign shown = 0 %}
+      {% for post in site.posts limit: 4 %}
+        {% unless forloop.first %}
+        {% assign thumb = thumb_letters[shown | modulo: 3] %}
+        <div class="side-card">
+          <div class="side-thumb side-thumb-{{ thumb }}"></div>
+          <div class="side-info">
+            <div class="side-title">
+              <a href="{{ post.url | relative_url }}" style="color:inherit;text-decoration:none;">{{ post.title }}</a>
+            </div>
+            <div class="side-meta">
+              <span class="badge {{ post.badge | default: 'badge-blue' }}">{{ post.category | default: 'Мэдээ' }}</span>
+              <span class="time-text" data-date="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%Y-%m-%d" }}</span>
+            </div>
           </div>
         </div>
-      </div>
-      <div class="side-card">
-        <div class="side-thumb side-thumb-b"></div>
-        <div class="side-info">
-          <div class="side-title">Steam хямдрал — ямар тоглоом авах вэ?</div>
-          <div class="side-meta">
-            <span class="badge badge-green">Зөвлөгөө</span>
-            <span class="time-text">8 цаг</span>
-          </div>
-        </div>
-      </div>
-      <div class="side-card">
-        <div class="side-thumb side-thumb-c"></div>
-        <div class="side-info">
-          <div class="side-title">Valorant — Монгол server нээгдэх үү?</div>
-          <div class="side-meta">
-            <span class="badge badge-red">Esports</span>
-            <span class="time-text">12 цаг</span>
-          </div>
-        </div>
-      </div>
+        {% assign shown = shown | plus: 1 %}
+        {% endunless %}
+      {% endfor %}
     </div>
   </div>
 
@@ -98,71 +59,27 @@
       <div class="see-all">Бүгдийг харах →</div>
     </div>
     <div class="news-grid">
+      {% assign thumb_classes = "a,b,c,d,e,f" | split: "," %}
+      {% for post in site.posts limit: 6 %}
+      {% assign thumb = thumb_classes[forloop.index0 | modulo: 6] %}
       <div class="news-card">
-        <div class="news-thumb news-thumb-a"></div>
-        <div class="news-body">
-          <div class="news-title">Cyberpunk 2077 шинэ major update гарлаа — юу өөрчлөгдөв?</div>
-          <div class="news-footer">
-            <span class="badge badge-blue">Мэдээ</span>
-            <span class="time-text">1 өдөр</span>
+        <a href="{{ post.url | relative_url }}" style="text-decoration:none;color:inherit;display:block;">
+          <div class="news-thumb news-thumb-{{ thumb }}"></div>
+          <div class="news-body">
+            <div class="news-title">{{ post.title }}</div>
+            <div class="news-footer">
+              <span class="badge {{ post.badge | default: 'badge-blue' }}">{{ post.category | default: 'Мэдээ' }}</span>
+              <span class="time-text" data-date="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%Y-%m-%d" }}</span>
+            </div>
           </div>
-        </div>
+        </a>
       </div>
-      <div class="news-card">
-        <div class="news-thumb news-thumb-b"></div>
-        <div class="news-body">
-          <div class="news-title">2025-ийн хамгийн сайн RPG тоглоомуудын жагсаалт</div>
-          <div class="news-footer">
-            <span class="badge badge-green">Top list</span>
-            <span class="time-text">2 өдөр</span>
-          </div>
-        </div>
-      </div>
-      <div class="news-card">
-        <div class="news-thumb news-thumb-c"></div>
-        <div class="news-body">
-          <div class="news-title">PC vs Console — Монголд ямар нь хямд байдаг вэ?</div>
-          <div class="news-footer">
-            <span class="badge badge-blue">Зөвлөгөө</span>
-            <span class="time-text">3 өдөр</span>
-          </div>
-        </div>
-      </div>
-      <div class="news-card">
-        <div class="news-thumb news-thumb-d"></div>
-        <div class="news-body">
-          <div class="news-title">Minecraft 2025 — Шинэ biome, mob бүгдийг нь авч үзлээ</div>
-          <div class="news-footer">
-            <span class="badge badge-green">Review</span>
-            <span class="time-text">4 өдөр</span>
-          </div>
-        </div>
-      </div>
-      <div class="news-card">
-        <div class="news-thumb news-thumb-e"></div>
-        <div class="news-body">
-          <div class="news-title">Free to play тоглоомд мөнгө зарцуулах нь зөв үү?</div>
-          <div class="news-footer">
-            <span class="badge badge-purple">Нийтлэл</span>
-            <span class="time-text">5 өдөр</span>
-          </div>
-        </div>
-      </div>
-      <div class="news-card">
-        <div class="news-thumb news-thumb-f"></div>
-        <div class="news-body">
-          <div class="news-title">Gaming chair vs Энгийн сандал — Монгол геймерийн туршлага</div>
-          <div class="news-footer">
-            <span class="badge badge-blue">Зөвлөгөө</span>
-            <span class="time-text">6 өдөр</span>
-          </div>
-        </div>
-      </div>
+      {% endfor %}
     </div>
   </div>
 
   <!-- QUIZ BANNER -->
-  <a class="quiz-banner" href="/quiz.html">
+  <a class="quiz-banner" href="{{ '/quiz.html' | relative_url }}">
     <div class="quiz-icon">🎮</div>
     <div class="quiz-info">
       <div class="qt">Чи ямар төрлийн геймер вэ?</div>
@@ -260,44 +177,3 @@
   </div>
 
 </main>
-
-<footer>
-  <div class="footer-logo">Respawn<span>MN</span></div>
-  <div class="footer-text">Монгол геймерүүдийн мэдээ, meme, quiz нэг дор</div>
-  <div class="footer-links">
-    <span class="footer-link">Бидний тухай</span>
-    <span class="footer-link">Холбоо барих</span>
-    <span class="footer-link">Нууцлалын бодлого</span>
-    <span class="footer-link">Facebook</span>
-    <span class="footer-link">Discord</span>
-  </div>
-</footer>
-
-<nav class="bottom-nav">
-  <div class="bottom-nav-inner">
-    <button class="bottom-nav-item active" onclick="bottomNavClick(this)">
-      <span class="bn-icon">📰</span>
-      <span class="bn-label">Мэдээ</span>
-    </button>
-    <button class="bottom-nav-item" onclick="bottomNavClick(this)">
-      <span class="bn-icon">🎮</span>
-      <span class="bn-label">Quiz</span>
-    </button>
-    <button class="bottom-nav-item" onclick="bottomNavClick(this)">
-      <span class="bn-icon">😂</span>
-      <span class="bn-label">Meme</span>
-    </button>
-    <button class="bottom-nav-item" onclick="bottomNavClick(this)">
-      <span class="bn-icon">⭐</span>
-      <span class="bn-label">Review</span>
-    </button>
-    <button class="bottom-nav-item" onclick="bottomNavClick(this)">
-      <span class="bn-icon">🏆</span>
-      <span class="bn-label">Esports</span>
-    </button>
-  </div>
-</nav>
-
-<script type="module" src="/src/main.ts"></script>
-</body>
-</html>

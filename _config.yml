@@ -1,0 +1,28 @@
+title: RespawnMN
+description: Монгол геймерүүдийн мэдээ, meme, quiz нэг дор
+lang: mn
+url: "https://respawnmn.site"
+baseurl: ""
+
+plugins: []
+
+exclude:
+  - scripts/
+  - Gemfile
+  - Gemfile.lock
+  - node_modules/
+  - package.json
+  - package-lock.json
+  - "*.mjs"
+
+defaults:
+  - scope:
+      path: "_posts"
+      type: posts
+    values:
+      layout: post
+      category: Мэдээ
+      badge: badge-blue
+      thumb: a
+
+permalink: /posts/:year/:month/:day/:title/

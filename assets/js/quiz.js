@@ -1,42 +1,4 @@
-import './styles/main.css'
-import './styles/quiz.css'
-
-// --- Theme (same as main) ---
-const THEME_KEY = 'respawn-theme'
-function applyTheme(theme: 'dark' | 'light'): void {
-  const btn = document.getElementById('theme-btn')
-  if (theme === 'light') {
-    document.body.classList.add('light')
-    if (btn) btn.textContent = '🌙'
-  } else {
-    document.body.classList.remove('light')
-    if (btn) btn.textContent = '☀️'
-  }
-}
-function toggleTheme(): void {
-  const isLight = document.body.classList.contains('light')
-  const next: 'dark' | 'light' = isLight ? 'dark' : 'light'
-  localStorage.setItem(THEME_KEY, next)
-  applyTheme(next)
-}
-const saved = localStorage.getItem(THEME_KEY) as 'dark' | 'light' | null
-applyTheme(saved ?? (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'))
-
-// --- Quiz data ---
-type GamerType = 'casual' | 'hardcore' | 'competitive' | 'story' | 'social'
-
-interface Option {
-  text: string
-  type: GamerType
-}
-
-interface Question {
-  q: string
-  emoji: string
-  options: Option[]
-}
-
-const questions: Question[] = [
+const questions = [
   {
     q: 'Тоглоом тоглоход хамгийн их юуг хайдаг вэ?',
     emoji: '🎯',
@@ -89,7 +51,7 @@ const questions: Question[] = [
   },
 ]
 
-const results: Record<GamerType, { title: string; emoji: string; desc: string; color: string }> = {
+const results = {
   casual: {
     title: 'Casual Gamer',
     emoji: '😎',
@@ -122,16 +84,12 @@ const results: Record<GamerType, { title: string; emoji: string; desc: string; c
   },
 }
 
-// --- State ---
 let current = 0
-const scores: Record<GamerType, number> = { casual: 0, hardcore: 0, competitive: 0, story: 0, social: 0 }
+const scores = { casual: 0, hardcore: 0, competitive: 0, story: 0, social: 0 }
 
-// --- Render ---
-function renderQuestion(): void {
+function renderQuestion() {
   const q = questions[current]
-  const container = document.getElementById('quiz-container')!
-
-  // Progress
+  const container = document.getElementById('quiz-container')
   const pct = (current / questions.length) * 100
   container.innerHTML = `
     <div class="quiz-progress-wrap">
@@ -155,16 +113,13 @@ function renderQuestion(): void {
   `
 }
 
-function selectOption(el: HTMLButtonElement, type: GamerType): void {
-  // Disable all options
-  document.querySelectorAll<HTMLButtonElement>('.quiz-option').forEach(b => {
+function selectOption(el, type) {
+  document.querySelectorAll('.quiz-option').forEach(b => {
     b.disabled = true
     b.classList.add('disabled')
   })
   el.classList.add('selected')
-
   scores[type]++
-
   setTimeout(() => {
     current++
     if (current < questions.length) {
@@ -175,11 +130,10 @@ function selectOption(el: HTMLButtonElement, type: GamerType): void {
   }, 420)
 }
 
-function renderResult(): void {
-  const top = (Object.keys(scores) as GamerType[]).reduce((a, b) => scores[a] >= scores[b] ? a : b)
+function renderResult() {
+  const top = Object.keys(scores).reduce((a, b) => scores[a] >= scores[b] ? a : b)
   const r = results[top]
-  const container = document.getElementById('quiz-container')!
-
+  const container = document.getElementById('quiz-container')
   container.innerHTML = `
     <div class="quiz-result">
       <div class="quiz-result-emoji">${r.emoji}</div>
@@ -187,7 +141,7 @@ function renderResult(): void {
       <div class="quiz-result-title" style="color:${r.color}">${r.title}</div>
       <div class="quiz-result-desc">${r.desc}</div>
       <div class="quiz-result-bars">
-        ${(Object.keys(scores) as GamerType[]).map(t => `
+        ${Object.keys(scores).map(t => `
           <div class="quiz-bar-row">
             <span class="quiz-bar-label">${results[t].title}</span>
             <div class="quiz-bar-track">
@@ -205,17 +159,13 @@ function renderResult(): void {
   `
 }
 
-function restartQuiz(): void {
+function restartQuiz() {
   current = 0
-  ;(Object.keys(scores) as GamerType[]).forEach(k => { scores[k] = 0 })
+  Object.keys(scores).forEach(k => { scores[k] = 0 })
   renderQuestion()
 }
 
-// Init
 renderQuestion()
 
-// Expose
-const g = window as unknown as Record<string, unknown>
-g.toggleTheme = toggleTheme
-g.selectOption = selectOption
-g.restartQuiz = restartQuiz
+window.selectOption = selectOption
+window.restartQuiz = restartQuiz

@@ -1,0 +1,26 @@
+<nav>
+  <a class="logo" href="{{ '/' | relative_url }}">Respawn<span>MN</span></a>
+  <div class="nav-links">
+    <button class="nav-link{% unless page.quiz %} active{% endunless %}" onclick="setActive(this)">Мэдээ</button>
+    <a class="nav-link{% if page.quiz %} active{% endif %}" href="{{ '/quiz.html' | relative_url }}">Quiz</a>
+    <button class="nav-link" onclick="setActive(this)">Meme</button>
+    <button class="nav-link" onclick="setActive(this)">Review</button>
+    <button class="nav-link" onclick="setActive(this)">Esports</button>
+  </div>
+  <div class="nav-right">
+    <input class="search" type="text" placeholder="🔍  Хайх...">
+    <div class="notif-btn">🔔</div>
+    <button class="theme-btn" id="theme-btn" onclick="toggleTheme()" title="Өнгөний горим">☀️</button>
+    <button class="hamburger" id="hamburger" onclick="toggleMobileMenu()" aria-label="Цэс">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<div class="mobile-menu" id="mobile-menu">
+  <button class="nav-link{% unless page.quiz %} active{% endunless %}" onclick="setActive(this)">Мэдээ</button>
+  <a class="nav-link{% if page.quiz %} active{% endif %}" href="{{ '/quiz.html' | relative_url }}">Quiz</a>
+  <button class="nav-link" onclick="setActive(this)">Meme</button>
+  <button class="nav-link" onclick="setActive(this)">Review</button>
+  <button class="nav-link" onclick="setActive(this)">Esports</button>
+</div>
