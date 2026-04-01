@@ -2,7 +2,8 @@
 <html lang="mn">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#111114">
   <title>RespawnMN — Монгол Gaming Сайт</title>
 </head>
 <body>
@@ -19,8 +20,20 @@
   <div class="nav-right">
     <input class="search" type="text" placeholder="🔍  Хайх...">
     <div class="notif-btn">🔔</div>
+    <button class="theme-btn" id="theme-btn" onclick="toggleTheme()" title="Өнгөний горим">☀️</button>
+    <button class="hamburger" id="hamburger" onclick="toggleMobileMenu()" aria-label="Цэс">
+      <span></span><span></span><span></span>
+    </button>
   </div>
 </nav>
+
+<div class="mobile-menu" id="mobile-menu">
+  <button class="nav-link active" onclick="setActive(this)">Мэдээ</button>
+  <button class="nav-link" onclick="setActive(this)">Quiz</button>
+  <button class="nav-link" onclick="setActive(this)">Meme</button>
+  <button class="nav-link" onclick="setActive(this)">Review</button>
+  <button class="nav-link" onclick="setActive(this)">Esports</button>
+</div>
 
 <main>
 
@@ -257,6 +270,31 @@
     <span class="footer-link">Discord</span>
   </div>
 </footer>
+
+<nav class="bottom-nav">
+  <div class="bottom-nav-inner">
+    <button class="bottom-nav-item active" onclick="bottomNavClick(this)">
+      <span class="bn-icon">📰</span>
+      <span class="bn-label">Мэдээ</span>
+    </button>
+    <button class="bottom-nav-item" onclick="bottomNavClick(this)">
+      <span class="bn-icon">🎮</span>
+      <span class="bn-label">Quiz</span>
+    </button>
+    <button class="bottom-nav-item" onclick="bottomNavClick(this)">
+      <span class="bn-icon">😂</span>
+      <span class="bn-label">Meme</span>
+    </button>
+    <button class="bottom-nav-item" onclick="bottomNavClick(this)">
+      <span class="bn-icon">⭐</span>
+      <span class="bn-label">Review</span>
+    </button>
+    <button class="bottom-nav-item" onclick="bottomNavClick(this)">
+      <span class="bn-icon">🏆</span>
+      <span class="bn-label">Esports</span>
+    </button>
+  </div>
+</nav>
 
 <script type="module" src="/src/main.ts"></script>
 </body>
