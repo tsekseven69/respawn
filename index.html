@@ -111,6 +111,45 @@ layout: default
 .new-card-name { padding: 8px 10px; font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .new-card-price { padding: 0 10px 10px; font-size: 12px; color: var(--muted); }
 
+/* Daily challenge banner */
+.daily-banner {
+  display: flex; align-items: center; gap: 16px; padding: 20px 24px;
+  background: linear-gradient(135deg, #2d1a4e 0%, #1a1040 100%);
+  border: 1px solid #5865f2; border-radius: 14px; margin-bottom: 16px;
+  text-decoration: none; color: inherit;
+}
+.daily-banner:hover { border-color: #7c8af2; }
+.daily-banner-icon { font-size: 36px; flex-shrink: 0; }
+.daily-banner-info { flex: 1; }
+.daily-banner-title { font-size: 16px; font-weight: 700; color: #c7d5e0; margin-bottom: 4px; }
+.daily-banner-sub { font-size: 13px; color: #8a7ab5; }
+.daily-banner-btn {
+  background: #5865f2; color: #fff; border: none; border-radius: 8px;
+  padding: 10px 18px; font-size: 13px; font-weight: 700; cursor: pointer;
+  white-space: nowrap; flex-shrink: 0;
+}
+
+/* Email signup */
+.email-section {
+  background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+  padding: 24px; margin-bottom: 40px; text-align: center;
+}
+.email-title { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+.email-sub { font-size: 13px; color: var(--muted); margin-bottom: 16px; }
+.email-form { display: flex; gap: 8px; max-width: 400px; margin: 0 auto; }
+.email-input {
+  flex: 1; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border);
+  background: var(--bg, #111); color: var(--text); font-size: 14px; outline: none;
+}
+.email-input:focus { border-color: #5865f2; }
+.email-submit {
+  padding: 10px 18px; border-radius: 8px; border: none;
+  background: #4c6b22; color: #a4d007; font-size: 13px; font-weight: 700;
+  cursor: pointer; white-space: nowrap;
+}
+.email-submit:hover { background: #5d7f2a; }
+.email-ok { color: #a4d007; font-size: 13px; margin-top: 10px; display: none; }
+
 .home-skeleton { background: var(--border); border-radius: 12px; animation: pulse 1.5s ease-in-out infinite; }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
 .home-loading { text-align: center; padding: 60px; color: var(--muted); }
@@ -137,6 +176,16 @@ layout: default
     </div>
   </div>
 
+  <!-- DAILY CHALLENGE BANNER -->
+  <a class="daily-banner" href="{{ '/daily.html' | relative_url }}">
+    <div class="daily-banner-icon">🎯</div>
+    <div class="daily-banner-info">
+      <div class="daily-banner-title">Өдрийн Challenge</div>
+      <div class="daily-banner-sub">Өдөр бүр шинэ gaming асуулт. Streak-ээ бүү алдаарай!</div>
+    </div>
+    <div class="daily-banner-btn">Тоглох →</div>
+  </a>
+
   <!-- PROFILE BANNER -->
   <a class="profile-banner" href="{{ '/steam.html' | relative_url }}">
     <div class="profile-banner-icon">🎮</div>
@@ -159,10 +208,22 @@ layout: default
     </div>
   </div>
 
+  <!-- EMAIL SIGNUP -->
+  <div class="email-section">
+    <div class="email-title">📬 Steam хямдралын мэдэгдэл</div>
+    <div class="email-sub">Email бүртгүүлж, Steam sale эхлэхэд хамгийн түрүүнд мэднэ</div>
+    <form class="email-form" onsubmit="return submitEmail(event)">
+      <input class="email-input" type="email" placeholder="Email хаяг..." required id="email-input">
+      <button class="email-submit" type="submit">Бүртгүүлэх</button>
+    </form>
+    <div class="email-ok" id="email-ok">✅ Амжилттай бүртгэгдлээ!</div>
+  </div>
+
   <!-- NEW RELEASES -->
   <div class="home-section">
     <div class="home-section-header">
       <div class="home-section-title">✨ Шинэ тоглоомууд</div>
+      <a class="home-see-all" href="{{ '/calendar.html' | relative_url }}">Хуанли →</a>
     </div>
     <div id="new-grid" class="new-grid">
       {% for i in (1..4) %}
@@ -276,6 +337,17 @@ function renderNew(releases) {
 }
 
 function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
+
+function submitEmail(e) {
+  e.preventDefault();
+  const email = document.getElementById('email-input').value;
+  // localStorage-д хадгалах (Formspree эсвэл бусад service нэмж болно)
+  const list = JSON.parse(localStorage.getItem('rmn_emails') || '[]');
+  if (!list.includes(email)) { list.push(email); localStorage.setItem('rmn_emails', JSON.stringify(list)); }
+  document.getElementById('email-ok').style.display = 'block';
+  document.getElementById('email-input').value = '';
+  return false;
+}
 
 loadHome()
 </script>

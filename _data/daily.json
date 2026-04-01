@@ -1,0 +1,152 @@
+[
+  {
+    "q": "Counter-Strike анх хэдэн онд гарсан бэ?",
+    "a": ["1999", "2001", "2003", "1997"],
+    "correct": 0
+  },
+  {
+    "q": "Steam дээр хамгийн их зэрэг тоглогч бүртгэгдсэн тоглоом аль нь вэ?",
+    "a": ["PUBG", "Counter-Strike 2", "Dota 2", "Palworld"],
+    "correct": 1
+  },
+  {
+    "q": "Minecraft-ийг хэн зохиосон бэ?",
+    "a": ["Gabe Newell", "Notch (Markus Persson)", "Hideo Kojima", "Todd Howard"],
+    "correct": 1
+  },
+  {
+    "q": "GTA V хэдэн онд анх гарсан бэ?",
+    "a": ["2011", "2013", "2015", "2012"],
+    "correct": 1
+  },
+  {
+    "q": "Dota 2 дээр нийт хэдэн hero байдаг вэ? (ойролцоогоор)",
+    "a": ["100+", "120+", "80+", "140+"],
+    "correct": 1
+  },
+  {
+    "q": "\"The cake is a lie\" гэсэн мим аль тоглоомоос гаралтай вэ?",
+    "a": ["Half-Life 2", "Portal", "BioShock", "Undertale"],
+    "correct": 1
+  },
+  {
+    "q": "Steam-ийг аль компани хөгжүүлсэн бэ?",
+    "a": ["EA", "Valve", "Epic Games", "Blizzard"],
+    "correct": 1
+  },
+  {
+    "q": "CS2-н Dust II газрын зураг анх аль хувилбарт нэмэгдсэн бэ?",
+    "a": ["CS 1.6", "CS:Source", "CS 1.3", "CS:GO"],
+    "correct": 2
+  },
+  {
+    "q": "Dark Souls цувралыг аль студи хөгжүүлсэн бэ?",
+    "a": ["Capcom", "Square Enix", "FromSoftware", "Konami"],
+    "correct": 2
+  },
+  {
+    "q": "Fortnite Battle Royale хэдэн тоглогч нэг match-д тоглодог вэ?",
+    "a": ["50", "100", "150", "64"],
+    "correct": 1
+  },
+  {
+    "q": "\"Leeroy Jenkins\" мим аль тоглоомоос гаралтай вэ?",
+    "a": ["RuneScape", "World of Warcraft", "EverQuest", "Guild Wars"],
+    "correct": 1
+  },
+  {
+    "q": "Steam Summer Sale ихэвчлэн хэдэн сард болдог вэ?",
+    "a": ["5-р сар", "6-р сар", "7-р сар", "8-р сар"],
+    "correct": 1
+  },
+  {
+    "q": "Elden Ring-ийг аль студи хөгжүүлсэн бэ?",
+    "a": ["CD Projekt Red", "FromSoftware", "Bethesda", "Rockstar"],
+    "correct": 1
+  },
+  {
+    "q": "Among Us тоглоомд хамгийн олондоо хэдэн тоглогч тоглож болдог вэ?",
+    "a": ["10", "12", "15", "8"],
+    "correct": 2
+  },
+  {
+    "q": "Стим дээрх хамгийн эхний тоглоом аль нь вэ?",
+    "a": ["Half-Life", "Counter-Strike", "Half-Life 2", "Team Fortress"],
+    "correct": 2
+  },
+  {
+    "q": "The Witcher 3-ийн гол дүр хэн бэ?",
+    "a": ["Geralt of Rivia", "Arthur Morgan", "Master Chief", "Link"],
+    "correct": 0
+  },
+  {
+    "q": "League of Legends-ийг аль компани хөгжүүлсэн бэ?",
+    "a": ["Valve", "Blizzard", "Riot Games", "EA"],
+    "correct": 2
+  },
+  {
+    "q": "Cyberpunk 2077-ийг аль студи хийсэн бэ?",
+    "a": ["Bethesda", "Ubisoft", "CD Projekt Red", "BioWare"],
+    "correct": 2
+  },
+  {
+    "q": "Minecraft дээр Ender Dragon-ийг устгахад юу хэрэгтэй вэ?",
+    "a": ["Diamond Sword", "Bed", "End Crystals устгах", "Golden Apple"],
+    "correct": 2
+  },
+  {
+    "q": "Steam Deck бол юу вэ?",
+    "a": ["Гар утас", "Зөөврийн PC gaming төхөөрөмж", "VR headset", "Keyboard"],
+    "correct": 1
+  },
+  {
+    "q": "Valorant-д хэдэн agent байдаг вэ? (ойролцоогоор)",
+    "a": ["15+", "20+", "25+", "10+"],
+    "correct": 2
+  },
+  {
+    "q": "\"GG\" гэдэг нь юуны товчлол вэ?",
+    "a": ["Get Good", "Good Game", "Go Go", "Great Going"],
+    "correct": 1
+  },
+  {
+    "q": "PUBG тоглоомд хамгийн том газрын зураг аль нь вэ?",
+    "a": ["Erangel", "Miramar", "Vikendi", "Sanhok"],
+    "correct": 1
+  },
+  {
+    "q": "Stardew Valley-ийг нэг хүн хөгжүүлсэн. Тэр хэн бэ?",
+    "a": ["Toby Fox", "ConcernedApe (Eric Barone)", "Notch", "Scott Cawthon"],
+    "correct": 1
+  },
+  {
+    "q": "RDR2 дэхь гол дүр хэн бэ?",
+    "a": ["John Marston", "Arthur Morgan", "Dutch van der Linde", "Trevor Phillips"],
+    "correct": 1
+  },
+  {
+    "q": "Half-Life 3 гарсан уу?",
+    "a": ["Тийм", "Үгүй", "2025-д зарлагдсан", "VR хувилбар гарсан"],
+    "correct": 1
+  },
+  {
+    "q": "Apex Legends аль тоглоомын universe-д болдог вэ?",
+    "a": ["Halo", "Titanfall", "Call of Duty", "Battlefield"],
+    "correct": 1
+  },
+  {
+    "q": "Steam Trading Card-ыг цуглуулаад юу хийж болдог вэ?",
+    "a": ["Зарах", "Badge хийх", "Бэлэглэх", "Дээрх бүгд"],
+    "correct": 3
+  },
+  {
+    "q": "Terraria-г аль студи хөгжүүлсэн бэ?",
+    "a": ["Mojang", "Re-Logic", "Team Cherry", "Supergiant Games"],
+    "correct": 1
+  },
+  {
+    "q": "CS2-д AWP-ийн торхонд хэдэн сум багтдаг вэ?",
+    "a": ["5", "10", "15", "20"],
+    "correct": 1
+  }
+]

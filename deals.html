@@ -46,6 +46,20 @@ title: Steam Хямдрал
 }
 
 .deals-count { font-size: 13px; color: var(--muted); margin-bottom: 16px; }
+.deal-card-links { display: flex; gap: 4px; padding: 0 12px 10px; flex-wrap: wrap; }
+.deal-link {
+  font-size: 11px; padding: 3px 8px; border-radius: 6px; text-decoration: none;
+  font-weight: 600; border: 1px solid var(--border); color: var(--muted);
+  transition: all 0.15s;
+}
+.deal-link:hover { border-color: #5865f2; color: var(--text); }
+.deal-link-steam { border-color: #1b2838; color: #c7d5e0; }
+.deal-link-steam:hover { background: #1b2838; }
+.deal-link-cd { border-color: #e85d00; color: #e85d00; }
+.deal-link-cd:hover { background: rgba(232,93,0,0.1); }
+.deal-link-en { border-color: #6c5ce7; color: #6c5ce7; }
+.deal-link-en:hover { background: rgba(108,92,231,0.1); }
+
 .deals-empty { text-align: center; padding: 60px; color: var(--muted); font-size: 15px; }
 .deals-skeleton { background: var(--border); border-radius: 12px; height: 170px; animation: pulse 1.5s ease-in-out infinite; }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
@@ -91,6 +105,12 @@ let currentTab = 'specials'
 function storeUrl(appid) {
   return `https://store.steampowered.com/app/${appid}/`
 }
+function cdkeysUrl(name) {
+  return `https://www.cdkeys.com/catalogsearch/result/?q=${encodeURIComponent(name)}`
+}
+function enebaUrl(name) {
+  return `https://www.eneba.com/store?text=${encodeURIComponent(name)}`
+}
 
 function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
 
@@ -126,7 +146,7 @@ function renderTab(tab) {
   }
 
   document.getElementById('deals-grid').innerHTML = games.map(g => `
-    <a class="deal-card" href="${storeUrl(g.appid)}" target="_blank" rel="noopener">
+    <div class="deal-card">
       <img class="deal-card-img" src="${g.image}" alt="${esc(g.name)}" onerror="this.style.background='var(--border)'">
       <div class="deal-card-body">
         <div class="deal-card-name">${esc(g.name)}</div>
@@ -141,7 +161,12 @@ function renderTab(tab) {
           }
         </div>
       </div>
-    </a>`).join('')
+      <div class="deal-card-links">
+        <a class="deal-link deal-link-steam" href="${storeUrl(g.appid)}" target="_blank" rel="noopener">Steam</a>
+        <a class="deal-link deal-link-cd" href="${cdkeysUrl(g.name)}" target="_blank" rel="noopener">CDKeys</a>
+        <a class="deal-link deal-link-en" href="${enebaUrl(g.name)}" target="_blank" rel="noopener">Eneba</a>
+      </div>
+    </div>`).join('')
 }
 
 function applySort() {

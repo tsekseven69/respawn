@@ -1,0 +1,86 @@
+[
+  {
+    "name": "GTA VI",
+    "date": "2025-10-01",
+    "platform": "PC, PS5, Xbox",
+    "emoji": "🌴",
+    "desc": "Rockstar-ийн хамгийн их хүлээгдсэн тоглоом"
+  },
+  {
+    "name": "Hollow Knight: Silksong",
+    "date": "2025-06-15",
+    "platform": "PC, Switch",
+    "emoji": "🦋",
+    "desc": "Team Cherry-ийн удаан хүлээгдсэн sequel"
+  },
+  {
+    "name": "Death Stranding 2",
+    "date": "2025-06-26",
+    "platform": "PS5, PC",
+    "emoji": "👶",
+    "desc": "Kojima Productions"
+  },
+  {
+    "name": "Doom: The Dark Ages",
+    "date": "2025-05-13",
+    "platform": "PC, PS5, Xbox",
+    "emoji": "😈",
+    "desc": "id Software-ийн шинэ DOOM"
+  },
+  {
+    "name": "Civilization VII",
+    "date": "2025-06-01",
+    "platform": "PC, Console",
+    "emoji": "🏛️",
+    "desc": "Firaxis-ийн стратеги тоглоомын шинэ хувилбар"
+  },
+  {
+    "name": "Fable",
+    "date": "2025-09-01",
+    "platform": "PC, Xbox",
+    "emoji": "⚔️",
+    "desc": "Playground Games-ийн reboot"
+  },
+  {
+    "name": "Metroid Prime 4",
+    "date": "2025-09-01",
+    "platform": "Switch 2",
+    "emoji": "🚀",
+    "desc": "Nintendo-ийн удаан хүлээгдсэн sequel"
+  },
+  {
+    "name": "Monster Hunter Wilds",
+    "date": "2025-04-28",
+    "platform": "PC, PS5, Xbox",
+    "emoji": "🐉",
+    "desc": "Capcom-ийн шинэ Monster Hunter"
+  },
+  {
+    "name": "Ghost of Yōtei",
+    "date": "2025-10-01",
+    "platform": "PS5, PC",
+    "emoji": "⛩️",
+    "desc": "Ghost of Tsushima-ийн sequel"
+  },
+  {
+    "name": "Mafia: The Old Country",
+    "date": "2025-08-01",
+    "platform": "PC, PS5, Xbox",
+    "emoji": "🤵",
+    "desc": "Hangar 13 Studios"
+  },
+  {
+    "name": "Borderlands 4",
+    "date": "2025-09-12",
+    "platform": "PC, PS5, Xbox",
+    "emoji": "💥",
+    "desc": "Gearbox-ийн looter shooter"
+  },
+  {
+    "name": "The Outer Worlds 2",
+    "date": "2025-12-01",
+    "platform": "PC, Xbox",
+    "emoji": "🌌",
+    "desc": "Obsidian Entertainment"
+  }
+]

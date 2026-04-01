@@ -1,0 +1,160 @@
+---
+layout: default
+title: Тоглоомын хуанли
+---
+
+<style>
+.cal-wrap { max-width: 720px; margin: 0 auto; padding: 24px 16px; }
+
+.cal-tabs { display: flex; gap: 6px; margin-bottom: 24px; flex-wrap: wrap; }
+.cal-tab {
+  padding: 7px 16px; border-radius: 20px; border: 1px solid var(--border);
+  background: var(--card); color: var(--muted); font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: all 0.2s;
+}
+.cal-tab:hover { border-color: #5865f2; color: var(--text); }
+.cal-tab.active { background: #5865f2; border-color: #5865f2; color: #fff; }
+
+/* Month group */
+.cal-month { font-size: 14px; font-weight: 700; color: #5865f2; margin: 28px 0 12px; text-transform: uppercase; letter-spacing: 1px; }
+.cal-month:first-child { margin-top: 0; }
+
+/* Game card */
+.cal-game {
+  display: flex; align-items: center; gap: 14px; padding: 14px 16px;
+  background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+  margin-bottom: 8px; transition: border-color 0.2s;
+}
+.cal-game:hover { border-color: #5865f2; }
+.cal-game-emoji { font-size: 28px; flex-shrink: 0; width: 42px; text-align: center; }
+.cal-game-info { flex: 1; min-width: 0; }
+.cal-game-name { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+.cal-game-meta { font-size: 12px; color: var(--muted); display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.cal-game-desc { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+.cal-platform {
+  display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: 11px;
+  font-weight: 600; background: rgba(255,255,255,0.06); color: var(--muted);
+}
+.cal-countdown {
+  font-size: 12px; font-weight: 600; flex-shrink: 0; text-align: right; min-width: 80px;
+}
+.cal-countdown.released { color: #a4d007; }
+.cal-countdown.upcoming { color: #57cbde; }
+.cal-countdown.soon { color: #ff6b6b; }
+
+.cal-empty { text-align: center; padding: 40px; color: var(--muted); }
+
+/* Notify btn */
+.cal-notify {
+  padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border);
+  background: none; color: var(--muted); font-size: 12px; cursor: pointer;
+  transition: all 0.2s; flex-shrink: 0;
+}
+.cal-notify:hover { border-color: #5865f2; color: var(--text); }
+.cal-notify.on { background: rgba(88,101,242,0.15); border-color: #5865f2; color: #5865f2; }
+</style>
+
+<main>
+<div class="cal-wrap">
+  <h1 style="font-size:24px;font-weight:700;margin-bottom:6px;">📅 Тоглоомын хуанли</h1>
+  <p style="color:var(--muted);font-size:14px;margin-bottom:24px;">Удахгүй гарах тоглоомууд ба тэдний огноо</p>
+
+  <div class="cal-tabs">
+    <button class="cal-tab active" data-filter="all">Бүгд</button>
+    <button class="cal-tab" data-filter="upcoming">Удахгүй</button>
+    <button class="cal-tab" data-filter="released">Гарсан</button>
+  </div>
+
+  <div id="cal-feed"></div>
+</div>
+</main>
+
+<script>
+const RELEASES = {{ site.data.releases | jsonify }};
+const MONTHS_MN = ['1-р сар','2-р сар','3-р сар','4-р сар','5-р сар','6-р сар','7-р сар','8-р сар','9-р сар','10-р сар','11-р сар','12-р сар'];
+let currentFilter = 'all';
+
+function getReminders() {
+  try { return JSON.parse(localStorage.getItem('rmn_cal_remind') || '{}'); } catch { return {}; }
+}
+function saveReminders(d) { localStorage.setItem('rmn_cal_remind', JSON.stringify(d)); }
+
+function toggleRemind(name) {
+  const r = getReminders();
+  if (r[name]) delete r[name]; else r[name] = true;
+  saveReminders(r);
+  render();
+}
+
+function render() {
+  const now = new Date();
+  const reminders = getReminders();
+  let games = RELEASES.map(g => {
+    const d = new Date(g.date + 'T00:00:00');
+    const diff = d - now;
+    const days = Math.ceil(diff / 86400000);
+    return { ...g, dateObj: d, days };
+  }).sort((a, b) => a.dateObj - b.dateObj);
+
+  if (currentFilter === 'upcoming') games = games.filter(g => g.days > 0);
+  else if (currentFilter === 'released') games = games.filter(g => g.days <= 0);
+
+  if (!games.length) {
+    document.getElementById('cal-feed').innerHTML = '<div class="cal-empty">Тоглоом олдсонгүй</div>';
+    return;
+  }
+
+  let html = '';
+  let lastMonth = '';
+
+  games.forEach(g => {
+    const monthKey = `${g.dateObj.getFullYear()} ${MONTHS_MN[g.dateObj.getMonth()]}`;
+    if (monthKey !== lastMonth) {
+      html += `<div class="cal-month">${monthKey}</div>`;
+      lastMonth = monthKey;
+    }
+
+    let countdown, cls;
+    if (g.days <= 0) { countdown = '✅ Гарсан'; cls = 'released'; }
+    else if (g.days <= 7) { countdown = `🔴 ${g.days} хоног`; cls = 'soon'; }
+    else if (g.days <= 30) { countdown = `${g.days} хоног`; cls = 'upcoming'; }
+    else { countdown = `${g.days} хоног`; cls = 'upcoming'; }
+
+    const isRemind = reminders[g.name];
+    const dateStr = g.date;
+
+    html += `
+    <div class="cal-game">
+      <div class="cal-game-emoji">${g.emoji}</div>
+      <div class="cal-game-info">
+        <div class="cal-game-name">${esc(g.name)}</div>
+        <div class="cal-game-meta">
+          <span>${dateStr}</span>
+          <span class="cal-platform">${esc(g.platform)}</span>
+        </div>
+        <div class="cal-game-desc">${esc(g.desc)}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+        <div class="cal-countdown ${cls}">${countdown}</div>
+        ${g.days > 0 ? `<button class="cal-notify ${isRemind ? 'on' : ''}" onclick="toggleRemind('${esc(g.name)}')">${isRemind ? '🔔 Сануулсан' : '🔕 Сануулах'}</button>` : ''}
+      </div>
+    </div>`;
+  });
+
+  document.getElementById('cal-feed').innerHTML = html;
+}
+
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+
+document.querySelectorAll('.cal-tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.cal-tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentFilter = btn.dataset.filter;
+    render();
+  });
+});
+
+render();
+</script>
