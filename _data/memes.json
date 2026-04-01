@@ -1,34 +1,142 @@
 [
   {
+    "id": 1,
     "emoji": "🌙",
-    "image": "",
-    "caption": "Шөнийн 2 цагт \"нэг дор дуусгана\" гэж байсан чинь...",
-    "likes": "1.2к",
-    "date": "2026-04-01",
-    "thumb": "a"
+    "caption": "Шөнийн 2 цагт \"нэг дор дуусгана\" гэж байсан чинь нар мандаж байна",
+    "tags": ["relatable", "cs2"],
+    "date": "2026-04-01"
   },
   {
+    "id": 2,
     "emoji": "💸",
-    "image": "",
-    "caption": "Steam хямдрал vs Хоолны мөнгө",
-    "likes": "3.4к",
-    "date": "2026-04-01",
-    "thumb": "b"
+    "caption": "Steam хямдрал: -90%\nМиний банкны данс: Би юу ч мэдэхгүй",
+    "tags": ["steam", "sale"],
+    "date": "2026-04-01"
   },
   {
+    "id": 3,
     "emoji": "😤",
-    "image": "",
-    "caption": "Solo queue-д орох үеийн сэтгэлзүй",
-    "likes": "891",
-    "date": "2026-04-01",
-    "thumb": "c"
+    "caption": "Solo queue: \"Энэ удаа teamate-ууд сайн байна\" гэж залбирч суух",
+    "tags": ["cs2", "ranked"],
+    "date": "2026-03-30"
   },
   {
+    "id": 4,
     "emoji": "🏆",
-    "image": "",
-    "caption": "Achievement unlock хийхэд гэр бүлийн хүн харах",
-    "likes": "2.1к",
-    "date": "2026-04-01",
-    "thumb": "d"
+    "caption": "100% achievement хийсэн тоглоом: 1\nНэг ч удаа нээгээгүй тоглоом: 47",
+    "tags": ["steam", "library"],
+    "date": "2026-03-30"
+  },
+  {
+    "id": 5,
+    "emoji": "📉",
+    "caption": "CS2 rank: Silver → Gold Nova → Silver\nСэтгэл санаа: 📈📉📉📉",
+    "tags": ["cs2", "ranked"],
+    "date": "2026-03-29"
+  },
+  {
+    "id": 6,
+    "emoji": "🔇",
+    "caption": "Шөнө тоглоод байхад ээж орж ирэх:\n*Alt+Tab хурд x9999*",
+    "tags": ["relatable", "home"],
+    "date": "2026-03-29"
+  },
+  {
+    "id": 7,
+    "emoji": "🎒",
+    "caption": "Steam library: 200 тоглоом\nТоглодог тоглоом: CS2, CS2, CS2",
+    "tags": ["steam", "cs2"],
+    "date": "2026-03-28"
+  },
+  {
+    "id": 8,
+    "emoji": "🤡",
+    "caption": "\"Энэ сар тоглоом авахгүй\" гэсэн би Steam Sale эхлэхэд:",
+    "tags": ["steam", "sale"],
+    "date": "2026-03-28"
+  },
+  {
+    "id": 9,
+    "emoji": "💀",
+    "caption": "Ping: 200ms\nTeammate: \"Яагаад муу тоглож байгаа юм??\"\nБи:",
+    "tags": ["lag", "relatable"],
+    "date": "2026-03-27"
+  },
+  {
+    "id": 10,
+    "emoji": "🧠",
+    "caption": "Шалгалтанд бэлдэх: ❌\nCS2 smoke lineup цээжлэх: ✅",
+    "tags": ["cs2", "school"],
+    "date": "2026-03-27"
+  },
+  {
+    "id": 11,
+    "emoji": "😭",
+    "caption": "Clutch 1v5 хийсэн... replay save хийгээгүй",
+    "tags": ["cs2", "pain"],
+    "date": "2026-03-26"
+  },
+  {
+    "id": 12,
+    "emoji": "🛒",
+    "caption": "Steam Wishlist: 50 тоглоом\nДанс: ₮2,000\nМатематик тохирохгүй байна",
+    "tags": ["steam", "sale"],
+    "date": "2026-03-26"
+  },
+  {
+    "id": 13,
+    "emoji": "⌨️",
+    "caption": "W key 3 жилийн дараа:\n⬜⬜💀⬜⬜\nA  S  D  F",
+    "tags": ["hardware", "relatable"],
+    "date": "2026-03-25"
+  },
+  {
+    "id": 14,
+    "emoji": "🎯",
+    "caption": "Aim training: Kovaak's дээр god-tier\nActual game: бөмбөг нэг ч тусахгүй",
+    "tags": ["cs2", "aim"],
+    "date": "2026-03-25"
+  },
+  {
+    "id": 15,
+    "emoji": "😴",
+    "caption": "Маргааш 8 цагт хичээл:\nОдоо: 4:30 AM\n\"Сүүлийн нэг round\"",
+    "tags": ["relatable", "school"],
+    "date": "2026-03-24"
+  },
+  {
+    "id": 16,
+    "emoji": "🔥",
+    "caption": "Найз: \"Юу тоглох вэ?\"\n40 минут Steam library scroll хийнэ\n\"Юу ч таалагдахгүй байна\"",
+    "tags": ["steam", "library"],
+    "date": "2026-03-24"
+  },
+  {
+    "id": 17,
+    "emoji": "💻",
+    "caption": "Компьютер шинэчлэх мөнгө: ❌\nSteam дээр хямдарсан тоглоом: \"АВАХ ЁСТОЙ\"",
+    "tags": ["steam", "sale"],
+    "date": "2026-03-23"
+  },
+  {
+    "id": 18,
+    "emoji": "🏃",
+    "caption": "Steam download: 99%\n\"Хурдан хурдан хурдан...\"\nUpdate шаардлагатай: +5GB",
+    "tags": ["steam", "pain"],
+    "date": "2026-03-23"
+  },
+  {
+    "id": 19,
+    "emoji": "🎤",
+    "caption": "Random teammate mic on:\n*Гэрийн бүх дуу чимээ*\n*Ээж хоол ид гэж байгаа*",
+    "tags": ["cs2", "relatable"],
+    "date": "2026-03-22"
+  },
+  {
+    "id": 20,
+    "emoji": "🏠",
+    "caption": "Гэрийн wifi:\nDownload: 2 Mbps\nPing: Тоо биш мэдрэмж",
+    "tags": ["lag", "relatable"],
+    "date": "2026-03-22"
   }
 ]

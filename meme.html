@@ -1,0 +1,221 @@
+---
+layout: default
+title: Gaming Meme
+---
+
+<style>
+.meme-wrap { max-width: 520px; margin: 0 auto; padding: 24px 16px; }
+
+/* Filters */
+.meme-filters { display: flex; gap: 6px; margin-bottom: 24px; flex-wrap: wrap; }
+.meme-filter {
+  padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border);
+  background: var(--card); color: var(--muted); font-size: 12px; font-weight: 600;
+  cursor: pointer; transition: all 0.2s;
+}
+.meme-filter:hover { border-color: #5865f2; color: var(--text); }
+.meme-filter.active { background: #5865f2; border-color: #5865f2; color: #fff; }
+
+/* Meme card — social feed style */
+.meme-item {
+  background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+  margin-bottom: 16px; overflow: hidden;
+  transition: transform 0.15s;
+}
+.meme-item:hover { transform: translateY(-1px); }
+
+.meme-content {
+  padding: 32px 24px; text-align: center; min-height: 160px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 16px;
+}
+.meme-emoji { font-size: 56px; line-height: 1; }
+.meme-text {
+  font-size: 17px; font-weight: 600; line-height: 1.6; color: var(--text);
+  white-space: pre-line; max-width: 400px;
+}
+
+.meme-footer {
+  display: flex; align-items: center; gap: 4px; padding: 10px 16px;
+  border-top: 1px solid var(--border);
+}
+.meme-action {
+  display: flex; align-items: center; gap: 5px; padding: 6px 12px;
+  border-radius: 8px; border: none; background: none;
+  color: var(--muted); font-size: 13px; cursor: pointer;
+  transition: all 0.15s; font-weight: 500;
+}
+.meme-action:hover { background: rgba(255,255,255,0.06); color: var(--text); }
+.meme-action.liked { color: #ff4757; }
+.meme-action.liked .meme-heart { transform: scale(1.2); }
+.meme-heart { transition: transform 0.2s; display: inline-block; }
+
+.meme-date { margin-left: auto; font-size: 12px; color: var(--muted); }
+
+.meme-tags { display: flex; gap: 4px; padding: 0 16px 10px; flex-wrap: wrap; }
+.meme-tag {
+  font-size: 11px; color: #5865f2; background: rgba(88,101,242,0.1);
+  padding: 2px 8px; border-radius: 10px; font-weight: 500;
+}
+
+/* Share toast */
+.share-toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+  background: #4c6b22; color: #a4d007; padding: 10px 20px; border-radius: 10px;
+  font-size: 13px; font-weight: 600; opacity: 0; transition: all 0.3s;
+  z-index: 999; pointer-events: none;
+}
+.share-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* Shuffle btn */
+.shuffle-bar { display: flex; gap: 10px; margin-bottom: 24px; }
+.shuffle-btn {
+  flex: 1; padding: 12px; border-radius: 10px; border: 1px solid var(--border);
+  background: var(--card); color: var(--text); font-size: 14px; font-weight: 600;
+  cursor: pointer; transition: all 0.2s; text-align: center;
+}
+.shuffle-btn:hover { border-color: #5865f2; background: rgba(88,101,242,0.1); }
+</style>
+
+<main>
+<div class="meme-wrap">
+  <h1 style="font-size:24px;font-weight:700;margin-bottom:6px;">😂 Gaming Meme</h1>
+  <p style="color:var(--muted);font-size:14px;margin-bottom:20px;">Монгол геймерүүдийн хамгийн relatable meme-үүд</p>
+
+  <div class="shuffle-bar">
+    <button class="shuffle-btn" onclick="shuffleMemes()">🎲 Холих</button>
+  </div>
+
+  <div class="meme-filters">
+    <button class="meme-filter active" data-tag="all">Бүгд</button>
+    <button class="meme-filter" data-tag="cs2">CS2</button>
+    <button class="meme-filter" data-tag="steam">Steam</button>
+    <button class="meme-filter" data-tag="sale">Хямдрал</button>
+    <button class="meme-filter" data-tag="relatable">Relatable</button>
+    <button class="meme-filter" data-tag="lag">Lag</button>
+    <button class="meme-filter" data-tag="school">Сургууль</button>
+  </div>
+
+  <div id="meme-feed"></div>
+</div>
+
+<div class="share-toast" id="share-toast">📋 Хуулагдлаа!</div>
+</main>
+
+<script>
+const MEMES = {{ site.data.memes | jsonify }};
+let currentFilter = 'all';
+let shuffled = false;
+
+function getLikes() {
+  try { return JSON.parse(localStorage.getItem('rmn_meme_likes') || '{}'); } catch { return {}; }
+}
+function saveLikes(data) {
+  localStorage.setItem('rmn_meme_likes', JSON.stringify(data));
+}
+function getLikeCounts() {
+  try { return JSON.parse(localStorage.getItem('rmn_meme_counts') || '{}'); } catch { return {}; }
+}
+function saveLikeCounts(data) {
+  localStorage.setItem('rmn_meme_counts', JSON.stringify(data));
+}
+
+function toggleLike(id) {
+  const likes = getLikes();
+  const counts = getLikeCounts();
+  if (likes[id]) {
+    delete likes[id];
+    counts[id] = Math.max((counts[id] || 1) - 1, 0);
+  } else {
+    likes[id] = true;
+    counts[id] = (counts[id] || 0) + 1;
+  }
+  saveLikes(likes);
+  saveLikeCounts(counts);
+  renderFeed();
+}
+
+function shareMeme(id) {
+  const meme = MEMES.find(m => m.id === id);
+  if (!meme) return;
+  const text = meme.emoji + ' ' + meme.caption + '\n\n— RespawnMN';
+  if (navigator.share) {
+    navigator.share({ text: text, url: window.location.href });
+  } else {
+    navigator.clipboard.writeText(text).then(() => {
+      const toast = document.getElementById('share-toast');
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2000);
+    });
+  }
+}
+
+function renderFeed() {
+  const likes = getLikes();
+  const counts = getLikeCounts();
+  let memes = [...MEMES];
+
+  if (currentFilter !== 'all') {
+    memes = memes.filter(m => m.tags && m.tags.includes(currentFilter));
+  }
+
+  if (shuffled) {
+    for (let i = memes.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [memes[i], memes[j]] = [memes[j], memes[i]];
+    }
+  }
+
+  const feed = document.getElementById('meme-feed');
+  if (!memes.length) {
+    feed.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted);">Энэ ангилалд meme байхгүй байна</div>';
+    return;
+  }
+
+  feed.innerHTML = memes.map(m => {
+    const isLiked = likes[m.id];
+    const count = counts[m.id] || 0;
+    const caption = esc(m.caption);
+    return `
+    <div class="meme-item">
+      <div class="meme-content">
+        <div class="meme-emoji">${m.emoji}</div>
+        <div class="meme-text">${caption}</div>
+      </div>
+      <div class="meme-tags">
+        ${(m.tags || []).map(t => `<span class="meme-tag">#${t}</span>`).join('')}
+      </div>
+      <div class="meme-footer">
+        <button class="meme-action ${isLiked ? 'liked' : ''}" onclick="toggleLike(${m.id})">
+          <span class="meme-heart">${isLiked ? '❤️' : '🤍'}</span>
+          <span>${count || ''}</span>
+        </button>
+        <button class="meme-action" onclick="shareMeme(${m.id})">📤 Хуваалцах</button>
+        <span class="meme-date">${m.date}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function shuffleMemes() {
+  shuffled = true;
+  renderFeed();
+  shuffled = false;
+}
+
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// Filter buttons
+document.querySelectorAll('.meme-filter').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.meme-filter').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentFilter = btn.dataset.tag;
+    renderFeed();
+  });
+});
+
+renderFeed();
+</script>
