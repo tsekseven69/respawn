@@ -63,6 +63,41 @@ title: Steam Хямдрал
 .deals-empty { text-align: center; padding: 60px; color: var(--muted); font-size: 15px; }
 .deals-skeleton { background: var(--border); border-radius: 12px; height: 170px; animation: pulse 1.5s ease-in-out infinite; }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+/* Price History */
+.deal-link-ph { border-color: #a4d007; color: #a4d007; cursor: pointer; background: none; }
+.deal-link-ph:hover { background: rgba(164,208,7,0.1); }
+
+.ph-modal-overlay {
+  display: none; position: fixed; inset: 0; z-index: 1000;
+  background: rgba(0,0,0,0.75); backdrop-filter: blur(4px);
+  align-items: center; justify-content: center; padding: 16px;
+}
+.ph-modal-overlay.open { display: flex; }
+.ph-modal {
+  background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+  max-width: 540px; width: 100%; padding: 24px; position: relative;
+}
+.ph-modal-close {
+  position: absolute; top: 12px; right: 14px; background: rgba(255,255,255,0.08);
+  border: none; color: var(--text); width: 30px; height: 30px; border-radius: 50%;
+  font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
+.ph-modal-title { font-size: 16px; font-weight: 700; margin-bottom: 4px; padding-right: 36px; }
+.ph-modal-current { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
+.ph-chart-wrap { width: 100%; height: 160px; position: relative; margin-bottom: 16px; }
+.ph-chart-wrap svg { width: 100%; height: 100%; }
+.ph-stats { display: flex; gap: 20px; flex-wrap: wrap; }
+.ph-stat { background: rgba(255,255,255,0.04); border-radius: 8px; padding: 10px 14px; flex: 1; min-width: 100px; }
+.ph-stat-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+.ph-stat-val { font-size: 16px; font-weight: 700; }
+.ph-recommendation {
+  margin-top: 16px; padding: 12px 16px; border-radius: 10px; font-size: 13px; font-weight: 600;
+}
+.ph-rec-buy { background: rgba(76,107,34,0.15); border: 1px solid #4c6b22; color: #a4d007; }
+.ph-rec-wait { background: rgba(255,107,107,0.1); border: 1px solid #ff6b6b; color: #ff6b6b; }
+.ph-rec-ok { background: rgba(88,101,242,0.1); border: 1px solid #5865f2; color: #7c8af2; }
+.ph-no-key { text-align: center; padding: 30px; color: var(--muted); font-size: 14px; }
 </style>
 
 <main>
@@ -165,6 +200,7 @@ function renderTab(tab) {
         <a class="deal-link deal-link-steam" href="${storeUrl(g.appid)}" target="_blank" rel="noopener">Steam</a>
         <a class="deal-link deal-link-cd" href="${cdkeysUrl(g.name)}" target="_blank" rel="noopener">CDKeys</a>
         <a class="deal-link deal-link-en" href="${enebaUrl(g.name)}" target="_blank" rel="noopener">Eneba</a>
+        <button class="deal-link deal-link-ph" onclick="openPriceHistory(${g.appid}, '${esc(g.name)}', ${g.finalPrice}, ${g.originalPrice}, ${g.discountPct})">📊 Түүх</button>
       </div>
     </div>`).join('')
 }
@@ -181,5 +217,154 @@ document.querySelectorAll('.deals-tab').forEach(btn => {
   })
 })
 
+// ── Price History Modal ──
+async function openPriceHistory(appid, name, finalPrice, origPrice, discPct) {
+  const overlay = document.getElementById('ph-modal-overlay')
+  const content = document.getElementById('ph-modal-content')
+  overlay.classList.add('open')
+  document.body.style.overflow = 'hidden'
+
+  const currentStr = finalPrice > 0
+    ? `Одоогийн үнэ: $${(finalPrice/100).toFixed(2)}${discPct > 0 ? ` (-${discPct}%)` : ''}`
+    : 'Үнэгүй'
+
+  content.innerHTML = `
+    <div class="ph-modal-title">${esc(name)}</div>
+    <div class="ph-modal-current">${currentStr}</div>
+    <div style="text-align:center;padding:30px;color:var(--muted)">⏳ Ачааллаж байна...</div>`
+
+  try {
+    const url = new URL(WORKER_URL)
+    url.searchParams.set('action', 'pricehistory')
+    url.searchParams.set('appid', appid)
+    const res = await fetch(url)
+    const data = await res.json()
+
+    if (data.error) {
+      const isNoKey = data.error.includes('ITAD_API_KEY')
+      content.innerHTML = `
+        <div class="ph-modal-title">${esc(name)}</div>
+        <div class="ph-modal-current">${currentStr}</div>
+        <div class="ph-no-key">
+          ${isNoKey
+            ? '🔑 IsThereAnyDeal API key тохируулагдаагүй байна.<br><small>Cloudflare Worker-т <code>ITAD_API_KEY</code> secret нэм.</small>'
+            : esc(data.error)
+          }
+        </div>`
+      return
+    }
+
+    const points = data.history || []
+    const allPrices = points.map(p => p.price).filter(p => p > 0)
+    const lowestPrice = allPrices.length ? Math.min(...allPrices) : null
+    const highestPrice = allPrices.length ? Math.max(...allPrices) : null
+    const currentDollars = finalPrice / 100
+    const isNearLow = lowestPrice && currentDollars <= lowestPrice * 1.1
+
+    const chartSvg = points.length >= 2 ? buildChart(points) : '<div style="text-align:center;padding:20px;color:var(--muted);font-size:13px;">Түүхийн дата хангалтгүй байна</div>'
+
+    let rec = '', recCls = ''
+    if (lowestPrice && currentDollars <= lowestPrice) {
+      rec = '🎯 Одоо авах хамгийн сайн цаг! Энэ бол түүхэн доод үнэ.'
+      recCls = 'ph-rec-buy'
+    } else if (lowestPrice && currentDollars <= lowestPrice * 1.15) {
+      rec = '✅ Үнэ түүхэн доод түвшинд ойрхон байна. Авахад тохиромжтой.'
+      recCls = 'ph-rec-buy'
+    } else if (discPct > 0) {
+      rec = '⏳ Хямдрал байна, гэхдээ илүү гүн хямдрал хүлээж болно.'
+      recCls = 'ph-rec-ok'
+    } else {
+      rec = '💤 Хямдрал хүлээх нь дээр. Steam Sale-д илүү хямдарна.'
+      recCls = 'ph-rec-wait'
+    }
+
+    content.innerHTML = `
+      <div class="ph-modal-title">${esc(name)}</div>
+      <div class="ph-modal-current">${currentStr}</div>
+      <div class="ph-chart-wrap">${chartSvg}</div>
+      <div class="ph-stats">
+        <div class="ph-stat">
+          <div class="ph-stat-label">Түүхэн доод үнэ</div>
+          <div class="ph-stat-val" style="color:#a4d007">${lowestPrice ? '$' + lowestPrice.toFixed(2) : '—'}</div>
+        </div>
+        <div class="ph-stat">
+          <div class="ph-stat-label">Ердийн үнэ</div>
+          <div class="ph-stat-val">${origPrice > 0 ? '$' + (origPrice/100).toFixed(2) : '—'}</div>
+        </div>
+        <div class="ph-stat">
+          <div class="ph-stat-label">Одоогийн үнэ</div>
+          <div class="ph-stat-val" style="color:${isNearLow ? '#a4d007' : 'var(--text)'}">${currentDollars > 0 ? '$' + currentDollars.toFixed(2) : 'Үнэгүй'}</div>
+        </div>
+      </div>
+      ${rec ? `<div class="ph-recommendation ${recCls}">${rec}</div>` : ''}`
+  } catch(e) {
+    content.innerHTML = `
+      <div class="ph-modal-title">${esc(name)}</div>
+      <div class="ph-modal-current">${currentStr}</div>
+      <div class="ph-no-key">Холбогдож чадсангүй. Дахин оролдоно уу.</div>`
+  }
+}
+
+function buildChart(points) {
+  const W = 490, H = 130, PAD = { t: 10, r: 10, b: 24, l: 40 }
+  const cw = W - PAD.l - PAD.r
+  const ch = H - PAD.t - PAD.b
+  const prices = points.map(p => p.price)
+  const minP = Math.min(...prices) * 0.9
+  const maxP = Math.max(...prices) * 1.1 || 1
+  const n = points.length
+
+  const px = (i) => PAD.l + (i / (n - 1)) * cw
+  const py = (p) => PAD.t + ch - ((p - minP) / (maxP - minP)) * ch
+
+  const pathD = points.map((p, i) => `${i === 0 ? 'M' : 'L'}${px(i).toFixed(1)},${py(p.price).toFixed(1)}`).join(' ')
+  const areaD = pathD + ` L${px(n-1).toFixed(1)},${(PAD.t+ch).toFixed(1)} L${PAD.l},${(PAD.t+ch).toFixed(1)} Z`
+
+  // Axis labels
+  const first = points[0].date.slice(0, 7)
+  const last = points[n-1].date.slice(0, 7)
+  const mid = points[Math.floor(n/2)].date.slice(0, 7)
+  const yLabels = [minP, (minP + maxP) / 2, maxP].map((v, i) => {
+    const y = py(v)
+    return `<text x="${PAD.l - 4}" y="${y + 4}" text-anchor="end" font-size="10" fill="#666">$${v.toFixed(0)}</text>`
+  })
+
+  return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="overflow:visible">
+    <defs>
+      <linearGradient id="phg" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#4c6b22" stop-opacity="0.4"/>
+        <stop offset="100%" stop-color="#4c6b22" stop-opacity="0"/>
+      </linearGradient>
+    </defs>
+    <line x1="${PAD.l}" y1="${PAD.t}" x2="${PAD.l}" y2="${PAD.t+ch}" stroke="#333" stroke-width="1"/>
+    <line x1="${PAD.l}" y1="${PAD.t+ch}" x2="${PAD.l+cw}" y2="${PAD.t+ch}" stroke="#333" stroke-width="1"/>
+    ${yLabels.join('')}
+    <text x="${PAD.l}" y="${H}" text-anchor="start" font-size="10" fill="#555">${first}</text>
+    <text x="${PAD.l + cw/2}" y="${H}" text-anchor="middle" font-size="10" fill="#555">${mid}</text>
+    <text x="${PAD.l + cw}" y="${H}" text-anchor="end" font-size="10" fill="#555">${last}</text>
+    <path d="${areaD}" fill="url(#phg)"/>
+    <path d="${pathD}" fill="none" stroke="#a4d007" stroke-width="2" stroke-linejoin="round"/>
+    ${points.map((p, i) => `<circle cx="${px(i).toFixed(1)}" cy="${py(p.price).toFixed(1)}" r="3" fill="#a4d007"/>`).join('')}
+  </svg>`
+}
+
+function closePriceHistory(e) {
+  if (e && e.target !== document.getElementById('ph-modal-overlay') && !e.target.classList.contains('ph-modal-close')) return
+  document.getElementById('ph-modal-overlay').classList.remove('open')
+  document.body.style.overflow = ''
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { document.getElementById('ph-modal-overlay').classList.remove('open'); document.body.style.overflow = '' }
+})
+
 loadDeals()
 </script>
+
+<!-- Price History Modal -->
+<div class="ph-modal-overlay" id="ph-modal-overlay" onclick="closePriceHistory(event)">
+  <div class="ph-modal">
+    <button class="ph-modal-close" onclick="closePriceHistory(event)">✕</button>
+    <div id="ph-modal-content"></div>
+  </div>
+</div>

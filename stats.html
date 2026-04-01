@@ -1,0 +1,172 @@
+---
+layout: default
+title: Тоглоомын статистик
+---
+
+<style>
+.stats-wrap { max-width: 820px; margin: 0 auto; padding: 24px 16px; }
+
+/* Top games table */
+.stats-section { margin-bottom: 40px; }
+.stats-section-title { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+.stats-section-sub { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
+
+.stats-table { width: 100%; border-collapse: collapse; }
+.stats-thead th {
+  font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase;
+  letter-spacing: 0.8px; padding: 0 12px 10px; text-align: left; border-bottom: 1px solid var(--border);
+}
+.stats-thead th:not(:first-child) { text-align: right; }
+
+.stats-row {
+  border-bottom: 1px solid var(--border); transition: background 0.15s; cursor: default;
+}
+.stats-row:hover { background: rgba(255,255,255,0.03); }
+.stats-row td { padding: 12px; vertical-align: middle; }
+.stats-row td:not(:first-child) { text-align: right; }
+
+.stats-rank { font-size: 14px; font-weight: 700; color: var(--muted); width: 32px; }
+.stats-rank-1 { color: #ffd700; }
+.stats-rank-2 { color: #c0c0c0; }
+.stats-rank-3 { color: #cd7f32; }
+
+.stats-game-cell { display: flex; align-items: center; gap: 12px; }
+.stats-game-img { width: 80px; height: 37px; object-fit: cover; border-radius: 5px; background: var(--border); flex-shrink: 0; }
+.stats-game-name { font-size: 14px; font-weight: 600; color: var(--text); }
+.stats-game-link { font-size: 11px; color: #5865f2; text-decoration: none; }
+.stats-game-link:hover { text-decoration: underline; }
+
+.stats-bar-wrap { display: flex; align-items: center; gap: 8px; justify-content: flex-end; }
+.stats-bar {
+  height: 6px; border-radius: 3px; background: #4c6b22; flex-shrink: 0;
+  transition: width 0.5s ease;
+}
+.stats-players { font-size: 13px; font-weight: 600; color: var(--text); white-space: nowrap; }
+.stats-hours { font-size: 13px; color: var(--muted); }
+
+.stats-score {
+  display: inline-block; font-size: 12px; font-weight: 700; padding: 2px 8px;
+  border-radius: 6px;
+}
+.stats-score-high { background: rgba(76,107,34,0.2); color: #a4d007; }
+.stats-score-mid { background: rgba(255,177,0,0.15); color: #ffd700; }
+.stats-score-low { background: rgba(255,100,100,0.15); color: #ff6464; }
+
+.stats-skeleton { background: var(--border); border-radius: 8px; height: 58px; animation: pulse 1.5s ease-in-out infinite; margin-bottom: 4px; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+.stats-updated { font-size: 12px; color: var(--muted); margin-top: 12px; }
+
+/* Mobile */
+@media (max-width: 580px) {
+  .stats-thead th.hide-mobile, .stats-row td.hide-mobile { display: none; }
+  .stats-game-img { width: 50px; height: 23px; }
+}
+</style>
+
+<main>
+<div class="stats-wrap">
+  <h1 style="font-size:24px;font-weight:700;margin-bottom:6px;">📊 Тоглоомын статистик</h1>
+  <p style="color:var(--muted);font-size:14px;margin-bottom:32px;">Steam дэлхийн эрэлтийн жагсаалт — сүүлийн 2 долоо хоног</p>
+
+  <div class="stats-section">
+    <div class="stats-section-title">🏆 Хамгийн их тоглогдсон 20 тоглоом</div>
+    <div class="stats-section-sub">SteamSpy дата · Steam дэлхийн дундаж</div>
+
+    <div id="stats-body">
+      {% for i in (1..10) %}
+      <div class="stats-skeleton"></div>
+      {% endfor %}
+    </div>
+    <div class="stats-updated" id="stats-updated"></div>
+  </div>
+</div>
+</main>
+
+<script>
+const WORKER_URL = 'https://respawnmn-steam-api.tsekseven69.workers.dev'
+
+function fmt(n) {
+  if (!n) return '—'
+  if (n >= 1000000) return (n/1000000).toFixed(1) + 'M'
+  if (n >= 1000) return (n/1000).toFixed(0) + 'K'
+  return String(n)
+}
+
+function scoreClass(s) {
+  if (!s) return ''
+  if (s >= 80) return 'stats-score-high'
+  if (s >= 60) return 'stats-score-mid'
+  return 'stats-score-low'
+}
+
+async function loadStats() {
+  try {
+    const url = new URL(WORKER_URL)
+    url.searchParams.set('action', 'topgames')
+    const res = await fetch(url)
+    const data = await res.json()
+    const games = data.games || []
+
+    if (!games.length) {
+      document.getElementById('stats-body').innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted);">Мэдээлэл байхгүй байна</div>'
+      return
+    }
+
+    const maxPlayers = Math.max(...games.map(g => g.players2weeks || 0), 1)
+
+    const tableHtml = `
+    <table class="stats-table">
+      <thead class="stats-thead">
+        <tr>
+          <th style="width:40px">#</th>
+          <th>Тоглоом</th>
+          <th class="hide-mobile">Тоглогчид (2 долоо хоног)</th>
+          <th class="hide-mobile">Дундаж цаг</th>
+          <th>Үнэлгээ</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${games.map((g, i) => {
+          const rankCls = i === 0 ? 'stats-rank-1' : i === 1 ? 'stats-rank-2' : i === 2 ? 'stats-rank-3' : ''
+          const barWidth = Math.round((g.players2weeks / maxPlayers) * 80)
+          const sc = g.score
+          return `
+          <tr class="stats-row">
+            <td><span class="stats-rank ${rankCls}">${i+1}</span></td>
+            <td>
+              <div class="stats-game-cell">
+                <img class="stats-game-img" src="${g.image}" alt="" onerror="this.style.display='none'">
+                <div>
+                  <div class="stats-game-name">${esc(g.name)}</div>
+                  <a class="stats-game-link" href="https://store.steampowered.com/app/${g.appid}/" target="_blank" rel="noopener">Steam →</a>
+                </div>
+              </div>
+            </td>
+            <td class="hide-mobile">
+              <div class="stats-bar-wrap">
+                <div class="stats-bar" style="width:${barWidth}px"></div>
+                <span class="stats-players">${fmt(g.players2weeks)}</span>
+              </div>
+            </td>
+            <td class="hide-mobile"><span class="stats-hours">${g.avgHours ? g.avgHours + 'ц' : '—'}</span></td>
+            <td>${sc !== null ? `<span class="stats-score ${scoreClass(sc)}">${sc}%</span>` : '—'}</td>
+          </tr>`
+        }).join('')}
+      </tbody>
+    </table>`
+
+    document.getElementById('stats-body').innerHTML = tableHtml
+    if (data.updated) {
+      const d = new Date(data.updated)
+      document.getElementById('stats-updated').textContent = `Шинэчлэгдсэн: ${d.toLocaleString('mn-MN')}`
+    }
+  } catch(e) {
+    document.getElementById('stats-body').innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted);">Холбогдож чадсангүй. Дахин оролдоно уу.</div>'
+  }
+}
+
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
+
+loadStats()
+</script>

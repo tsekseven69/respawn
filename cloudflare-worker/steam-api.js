@@ -184,8 +184,83 @@ export default {
           }))
         })
 
+      } else if (action === 'comingsoon') {
+        const res = await fetch(`${STORE_BASE}/api/featuredcategories/?l=english&cc=US`)
+        const data = await res.json()
+        const items = data.coming_soon?.items || []
+        const games = items.slice(0, 20).map(g => ({
+          appid: g.id,
+          name: g.name,
+          releaseDate: g.release_date_stamp
+            ? new Date(g.release_date_stamp * 1000).toISOString().split('T')[0]
+            : '',
+          releaseDateStr: g.release_date || '',
+          image: g.large_capsule_image || g.header_image || '',
+          price: g.final_price || 0,
+        }))
+        return json({ games })
+
+      } else if (action === 'topgames') {
+        const res = await fetch('https://steamspy.com/api.php?request=top100in2weeks', {
+          headers: { 'User-Agent': 'RespawnMN/1.0' },
+        })
+        const data = await res.json()
+        const games = Object.values(data).slice(0, 20).map(g => ({
+          appid: g.appid,
+          name: g.name,
+          players2weeks: g.players_2weeks || 0,
+          avgHours: Math.round((g.average_2weeks || 0) / 60 * 10) / 10,
+          score: (g.positive && g.negative)
+            ? Math.round(g.positive / (g.positive + g.negative) * 100)
+            : null,
+          image: `https://cdn.cloudflare.steamstatic.com/steam/apps/${g.appid}/capsule_231x87.jpg`,
+        }))
+        return json({ games, updated: new Date().toISOString() })
+
+      } else if (action === 'pricehistory') {
+        const appid = url.searchParams.get('appid')
+        if (!appid) return json({ error: 'appid шаардлагатай' }, 400)
+
+        const itadKey = env.ITAD_API_KEY
+        if (!itadKey) return json({ error: 'ITAD_API_KEY тохируулагдаагүй' }, 503)
+
+        // Look up game ID by Steam appid
+        const lookupRes = await fetch(
+          `https://api.isthereanydeal.com/games/lookup/v1?key=${itadKey}&appids=app/${appid}`
+        )
+        const lookupData = await lookupRes.json()
+        const gameId = lookupData.games?.[`app/${appid}`]?.id
+        if (!gameId) return json({ error: 'Тоглоом олдсонгүй' }, 404)
+
+        // Get price history on Steam
+        const histRes = await fetch(
+          `https://api.isthereanydeal.com/games/history/v2?key=${itadKey}&id=${gameId}&shops=steam`
+        )
+        const histData = await histRes.json()
+        const steamHistory = Array.isArray(histData)
+          ? histData.find(s => s.shop?.id === 'steam')
+          : null
+
+        const points = (steamHistory?.price || []).map(h => ({
+          date: new Date(h.timestamp * 1000).toISOString().split('T')[0],
+          price: h.deal?.price?.amount ?? 0,
+          regular: h.deal?.regular?.amount ?? 0,
+        }))
+
+        // Current price from Steam store
+        const storeRes = await fetch(
+          `${STORE_BASE}/api/appdetails?appids=${appid}&cc=US&filters=price_overview`
+        )
+        const storeData = await storeRes.json()
+        const po = storeData[appid]?.data?.price_overview
+
+        return json({
+          current: po ? { final: po.final_formatted, discount: po.discount_percent } : null,
+          history: points,
+        })
+
       } else {
-        return json({ error: 'action parameter буруу. deals | steamnews | resolve | profile | games | recent' }, 400)
+        return json({ error: 'action parameter буруу. deals | steamnews | comingsoon | topgames | pricehistory | resolve | profile | games | recent' }, 400)
       }
 
     } catch (err) {
