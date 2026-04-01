@@ -10,6 +10,7 @@ layout: default
       <h1 class="post-title">{{ page.title }}</h1>
       <div class="hero-meta" style="padding:0; border:none; margin-bottom:24px;">
         <span class="time-text" data-date="{{ page.date | date_to_xmlschema }}">{{ page.date | date: "%Y-%m-%d" }}</span>
+        <span class="post-views" id="post-views" style="margin-left:8px; color:var(--muted); font-size:13px;">👁 ...</span>
         {% if page.translated %}<span class="badge badge-purple" style="margin-left:auto;">🤖 Орчуулсан</span>{% endif %}
       </div>
     </div>
@@ -21,3 +22,22 @@ layout: default
     </div>
   </div>
 </main>
+
+<script>
+(function() {
+  var slug = {{ page.slug | default: page.url | jsonify }};
+  var key = slug.replace(/[^a-z0-9-]/gi, '-').replace(/^-+|-+$/g, '').toLowerCase();
+  fetch('https://api.countapi.xyz/hit/respawnmn/' + key)
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      var el = document.getElementById('post-views');
+      if (el && d && d.value) {
+        el.textContent = '👁 ' + d.value.toLocaleString();
+      }
+    })
+    .catch(function() {
+      var el = document.getElementById('post-views');
+      if (el) el.textContent = '';
+    });
+})();
+</script>
