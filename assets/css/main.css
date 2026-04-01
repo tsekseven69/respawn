@@ -64,7 +64,7 @@ nav {
 .logo { font-size: 18px; font-weight: 700; color: var(--text); letter-spacing: -0.5px; white-space: nowrap; text-decoration: none; }
 .logo span { color: var(--blue); }
 .nav-links { display: flex; gap: 4px; }
-.nav-link { font-size: 13px; color: var(--muted); cursor: pointer; padding: 6px 12px; border-radius: 6px; transition: all 0.15s; border: none; background: none; }
+.nav-link { font-size: 13px; color: var(--muted); cursor: pointer; padding: 6px 12px; border-radius: 6px; transition: all 0.15s; border: none; background: none; text-decoration: none; }
 .nav-link:hover { color: var(--text); background: var(--bg3); }
 .nav-link.active { color: var(--text); background: var(--bg3); }
 .nav-right { margin-left: auto; display: flex; gap: 8px; align-items: center; }
