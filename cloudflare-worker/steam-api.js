@@ -204,9 +204,10 @@ function parseRSS(xml) {
     const c = match[1]
     const title = extractTag(c, 'title')
     const link = extractTag(c, 'link') || extractLink(c)
-    const desc = stripHtml(extractTag(c, 'description')).slice(0, 200)
+    const rawDesc = decodeEntities(extractTag(c, 'description'))
+    const desc = stripHtml(rawDesc).slice(0, 200)
     const date = extractTag(c, 'pubDate')
-    const image = extractImage(c)
+    const image = extractImage(c) || extractImage(rawDesc)
     if (title) items.push({ title, link, description: desc, date, image })
   }
   return items
@@ -236,13 +237,17 @@ function extractImage(xml) {
   return ''
 }
 
-function stripHtml(html) {
-  if (!html) return ''
-  return html
-    .replace(/<[^>]*>/g, '')
+function decodeEntities(text) {
+  if (!text) return ''
+  return text
     .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
     .replace(/&quot;/g, '"').replace(/&#039;/g, "'").replace(/&nbsp;/g, ' ')
-    .trim()
+    .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(n))
+}
+
+function stripHtml(html) {
+  if (!html) return ''
+  return html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()
 }
 
 // ─── Fallback: fetch news from popular games via Steam API ───
