@@ -12,6 +12,7 @@ const CORS_HEADERS = {
 }
 
 const STEAM_BASE = 'https://api.steampowered.com'
+const STORE_BASE = 'https://store.steampowered.com'
 
 export default {
   async fetch(request, env) {
@@ -21,15 +22,36 @@ export default {
 
     const url = new URL(request.url)
     const action = url.searchParams.get('action')
-    const key = env.STEAM_API_KEY
-
-    if (!key) {
-      return json({ error: 'Steam API key тохируулагдаагүй' }, 500)
-    }
 
     try {
+      // --- No API key needed ---
+      if (action === 'deals') {
+        const res = await fetch(`${STORE_BASE}/api/featuredcategories/?l=english&cc=US`)
+        const data = await res.json()
+
+        function mapItem(g) {
+          return {
+            appid: g.id,
+            name: g.name,
+            discountPct: g.discount_percent || 0,
+            originalPrice: g.original_price || 0,
+            finalPrice: g.final_price || 0,
+            image: g.large_capsule_image || g.header_image || '',
+          }
+        }
+
+        return json({
+          specials: (data.specials?.items || []).filter(g => g.discount_percent > 0).map(mapItem),
+          topSellers: (data.top_sellers?.items || []).map(mapItem),
+          newReleases: (data.new_releases?.items || []).map(mapItem),
+        })
+      }
+
+      // --- API key required ---
+      const key = env.STEAM_API_KEY
+      if (!key) return json({ error: 'Steam API key тохируулагдаагүй' }, 500)
+
       if (action === 'resolve') {
-        // Vanity URL → Steam ID
         const vanity = url.searchParams.get('vanity')
         if (!vanity) return json({ error: 'vanity parameter шаардлагатай' }, 400)
 
@@ -40,7 +62,6 @@ export default {
         return json(data.response)
 
       } else if (action === 'profile') {
-        // Steam ID → Profile info
         const steamid = url.searchParams.get('steamid')
         if (!steamid) return json({ error: 'steamid parameter шаардлагатай' }, 400)
 
@@ -69,7 +90,6 @@ export default {
         })
 
       } else if (action === 'games') {
-        // Owned games + hours
         const steamid = url.searchParams.get('steamid')
         if (!steamid) return json({ error: 'steamid parameter шаардлагатай' }, 400)
 
@@ -79,7 +99,6 @@ export default {
         const data = await res.json()
         const games = data.response?.games || []
 
-        // Sort by most played, top 10
         const sorted = games
           .sort((a, b) => b.playtime_forever - a.playtime_forever)
           .slice(0, 10)
@@ -93,12 +112,11 @@ export default {
 
         return json({
           total: games.length,
-          totalHours: Math.round(games.reduce((s, g) => s + g.playtime_forever, 0) / 60),
+          totalHours: Math.round(games.reduce((s, g) => s + (g.playtime_forever || 0), 0) / 60),
           games: sorted,
         })
 
       } else if (action === 'recent') {
-        // Recently played games (2 weeks)
         const steamid = url.searchParams.get('steamid')
         if (!steamid) return json({ error: 'steamid parameter шаардлагатай' }, 400)
 
@@ -119,7 +137,7 @@ export default {
         })
 
       } else {
-        return json({ error: 'action parameter буруу. resolve | profile | games | recent' }, 400)
+        return json({ error: 'action parameter буруу. deals | resolve | profile | games | recent' }, 400)
       }
 
     } catch (err) {

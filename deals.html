@@ -1,0 +1,160 @@
+---
+layout: default
+title: Steam Хямдрал
+---
+
+<style>
+.deals-wrap { max-width: 1100px; margin: 0 auto; padding: 24px 16px; }
+
+/* Tabs */
+.deals-tabs { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
+.deals-tab {
+  padding: 8px 16px; border-radius: 20px; border: 1px solid var(--border);
+  background: var(--card); color: var(--muted); font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: all 0.2s; white-space: nowrap;
+}
+.deals-tab:hover { border-color: #4c6b22; color: var(--text); }
+.deals-tab.active { background: #4c6b22; border-color: #4c6b22; color: #a4d007; }
+
+/* Grid */
+.deals-full-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+@media (max-width: 900px) { .deals-full-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 600px) { .deals-full-grid { grid-template-columns: repeat(2, 1fr); } }
+
+.deal-card {
+  background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+  overflow: hidden; text-decoration: none; color: inherit; display: block;
+  transition: border-color 0.2s, transform 0.15s;
+}
+.deal-card:hover { border-color: #4c6b22; transform: translateY(-2px); }
+.deal-card-img { width: 100%; height: 110px; object-fit: cover; display: block; background: var(--border); }
+.deal-card-body { padding: 10px 12px 12px; }
+.deal-card-name { font-size: 13px; font-weight: 600; margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.deal-card-price { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+.deal-badge { background: #4c6b22; color: #a4d007; font-size: 12px; font-weight: 700; padding: 2px 6px; border-radius: 4px; flex-shrink: 0; }
+.deal-orig { color: var(--muted); font-size: 12px; text-decoration: line-through; }
+.deal-final { color: #a4d007; font-size: 13px; font-weight: 700; }
+.deal-free { color: #57cbde; font-size: 13px; font-weight: 700; }
+.deal-no-disc { color: var(--text); font-size: 13px; font-weight: 600; }
+
+/* Sort bar */
+.deals-sort { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+.deals-sort-label { font-size: 13px; color: var(--muted); }
+.deals-sort select {
+  padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border);
+  background: var(--card); color: var(--text); font-size: 13px; cursor: pointer; outline: none;
+}
+
+.deals-count { font-size: 13px; color: var(--muted); margin-bottom: 16px; }
+.deals-empty { text-align: center; padding: 60px; color: var(--muted); font-size: 15px; }
+.deals-skeleton { background: var(--border); border-radius: 12px; height: 170px; animation: pulse 1.5s ease-in-out infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+</style>
+
+<main>
+<div class="deals-wrap">
+  <h1 style="font-size:24px;font-weight:700;margin-bottom:6px;">🔥 Steam Хямдрал</h1>
+  <p style="color:var(--muted);font-size:14px;margin-bottom:24px;">Steam дэлгүүрийн одоогийн хямдрал, шинэ болон эрэлттэй тоглоомууд</p>
+
+  <div class="deals-tabs">
+    <button class="deals-tab active" data-tab="specials">⚡ Хямдрал</button>
+    <button class="deals-tab" data-tab="topSellers">🏆 Эрэлттэй</button>
+    <button class="deals-tab" data-tab="newReleases">✨ Шинэ</button>
+  </div>
+
+  <div class="deals-sort">
+    <span class="deals-sort-label">Эрэмбэлэх:</span>
+    <select id="sort-select" onchange="applySort()">
+      <option value="default">Үндсэн</option>
+      <option value="disc">Хямдрал (их → бага)</option>
+      <option value="price-asc">Үнэ (хямд → үнэтэй)</option>
+      <option value="price-desc">Үнэ (үнэтэй → хямд)</option>
+      <option value="name">Нэр (А-Я)</option>
+    </select>
+  </div>
+
+  <div id="deals-count" class="deals-count"></div>
+  <div id="deals-grid" class="deals-full-grid">
+    {% for i in (1..12) %}
+    <div class="deals-skeleton"></div>
+    {% endfor %}
+  </div>
+</div>
+</main>
+
+<script>
+const WORKER_URL = 'https://respawnmn-steam-api.tsekseven69.workers.dev'
+
+let allData = null
+let currentTab = 'specials'
+
+function storeUrl(appid) {
+  return `https://store.steampowered.com/app/${appid}/`
+}
+
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
+
+async function loadDeals() {
+  try {
+    const url = new URL(WORKER_URL)
+    url.searchParams.set('action', 'deals')
+    const res = await fetch(url)
+    allData = await res.json()
+    renderTab(currentTab)
+  } catch(e) {
+    document.getElementById('deals-grid').innerHTML = '<div class="deals-empty" style="grid-column:1/-1">Steam дэлгүүрт холбогдож чадсангүй. Дахин оролдоно уу.</div>'
+  }
+}
+
+function renderTab(tab) {
+  currentTab = tab
+  if (!allData) return
+  let games = [...(allData[tab] || [])]
+
+  const sort = document.getElementById('sort-select').value
+  if (sort === 'disc') games.sort((a,b) => b.discountPct - a.discountPct)
+  else if (sort === 'price-asc') games.sort((a,b) => a.finalPrice - b.finalPrice)
+  else if (sort === 'price-desc') games.sort((a,b) => b.finalPrice - a.finalPrice)
+  else if (sort === 'name') games.sort((a,b) => a.name.localeCompare(b.name))
+
+  const count = games.length
+  document.getElementById('deals-count').textContent = count ? `${count} тоглоом` : ''
+
+  if (!count) {
+    document.getElementById('deals-grid').innerHTML = '<div class="deals-empty" style="grid-column:1/-1">Одоогоор мэдээлэл байхгүй байна</div>'
+    return
+  }
+
+  document.getElementById('deals-grid').innerHTML = games.map(g => `
+    <a class="deal-card" href="${storeUrl(g.appid)}" target="_blank" rel="noopener">
+      <img class="deal-card-img" src="${g.image}" alt="${esc(g.name)}" onerror="this.style.background='var(--border)'">
+      <div class="deal-card-body">
+        <div class="deal-card-name">${esc(g.name)}</div>
+        <div class="deal-card-price">
+          ${g.discountPct > 0 ? `<span class="deal-badge">-${g.discountPct}%</span>` : ''}
+          ${g.discountPct > 0 && g.originalPrice > 0 ? `<span class="deal-orig">$${(g.originalPrice/100).toFixed(2)}</span>` : ''}
+          ${g.finalPrice === 0
+            ? '<span class="deal-free">Үнэгүй</span>'
+            : g.discountPct > 0
+              ? `<span class="deal-final">$${(g.finalPrice/100).toFixed(2)}</span>`
+              : `<span class="deal-no-disc">$${(g.finalPrice/100).toFixed(2)}</span>`
+          }
+        </div>
+      </div>
+    </a>`).join('')
+}
+
+function applySort() {
+  renderTab(currentTab)
+}
+
+document.querySelectorAll('.deals-tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.deals-tab').forEach(b => b.classList.remove('active'))
+    btn.classList.add('active')
+    renderTab(btn.dataset.tab)
+  })
+})
+
+loadDeals()
+</script>
