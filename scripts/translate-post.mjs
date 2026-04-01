@@ -37,6 +37,15 @@ function parseArgs() {
 
 const args = parseArgs()
 
+// --from-env: read inputs from environment variables (used by GitHub Actions)
+if (args['from-env']) {
+  args.title = process.env.POST_TITLE
+  args.category = process.env.POST_CATEGORY || 'Мэдээ'
+  args.badge = process.env.POST_BADGE || 'badge-blue'
+  args.featured = process.env.POST_FEATURED === 'true' ? 'true' : 'false'
+  args.date = process.env.POST_DATE || ''
+}
+
 if (!args.title) {
   console.error('❌  --title шаардлагатай')
   process.exit(1)
@@ -47,8 +56,15 @@ if (!process.env.ANTHROPIC_API_KEY) {
   process.exit(1)
 }
 
-// Body from --body or --file
+// Body from --body, --file, env base64, or env plain
 let englishBody = args.body ?? ''
+
+if (!englishBody && process.env.POST_BODY_B64) {
+  englishBody = Buffer.from(process.env.POST_BODY_B64, 'base64').toString('utf8')
+} else if (!englishBody && process.env.POST_BODY) {
+  englishBody = process.env.POST_BODY
+}
+
 if (!englishBody && args.file) {
   const filePath = resolve(process.cwd(), args.file)
   if (!existsSync(filePath)) {
@@ -59,7 +75,7 @@ if (!englishBody && args.file) {
 }
 
 if (!englishBody) {
-  console.error('❌  --body эсвэл --file шаардлагатай')
+  console.error('❌  --body, --file, эсвэл POST_BODY_B64 env шаардлагатай')
   process.exit(1)
 }
 

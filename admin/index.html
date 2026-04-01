@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — RespawnMN</title>
+<style>
+:root {
+  --bg: #0d0d0f; --bg2: #111114; --bg3: #151518;
+  --border: #2a2a2e; --text: #e8e8e8; --muted: #888; --dim: #555;
+  --blue: #5a9ef5; --blue-bg: #1e2d42; --blue-border: #2a4a72;
+  --green: #5ab85a; --green-bg: #1e2d1e; --red: #e05a3a;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+/* GATE */
+.gate { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 24px; }
+.gate-card { background: var(--bg3); border: 0.5px solid var(--border); border-radius: 16px; padding: 40px 32px; width: 100%; max-width: 380px; text-align: center; }
+.gate-logo { font-size: 22px; font-weight: 800; margin-bottom: 6px; }
+.gate-logo span { color: var(--blue); }
+.gate-sub { font-size: 13px; color: var(--muted); margin-bottom: 32px; }
+.gate-input { width: 100%; background: var(--bg2); border: 0.5px solid var(--border); border-radius: 10px; padding: 12px 16px; font-size: 14px; color: var(--text); outline: none; margin-bottom: 12px; }
+.gate-input:focus { border-color: var(--blue); }
+.gate-btn { width: 100%; background: var(--blue); color: #fff; border: none; border-radius: 10px; padding: 12px; font-size: 14px; font-weight: 600; cursor: pointer; }
+.gate-btn:hover { opacity: 0.9; }
+.gate-err { font-size: 12px; color: var(--red); margin-top: 10px; display: none; }
+
+/* SETUP */
+.setup-hint { font-size: 12px; color: var(--muted); margin-top: 16px; line-height: 1.6; }
+.setup-hint a { color: var(--blue); cursor: pointer; text-decoration: underline; }
+
+/* HEADER */
+header { background: var(--bg2); border-bottom: 0.5px solid var(--border); padding: 0 24px; height: 52px; display: flex; align-items: center; gap: 16px; position: sticky; top: 0; z-index: 10; }
+.h-logo { font-size: 16px; font-weight: 700; }
+.h-logo span { color: var(--blue); }
+.h-badge { font-size: 10px; background: var(--blue-bg); color: var(--blue); border: 0.5px solid var(--blue-border); border-radius: 4px; padding: 2px 8px; }
+.h-right { margin-left: auto; display: flex; gap: 8px; }
+.h-btn { background: var(--bg3); border: 0.5px solid var(--border); border-radius: 8px; padding: 6px 14px; font-size: 12px; color: var(--muted); cursor: pointer; }
+.h-btn:hover { color: var(--text); }
+
+/* TABS */
+.tabs { display: flex; gap: 4px; padding: 20px 24px 0; }
+.tab { font-size: 13px; color: var(--muted); cursor: pointer; padding: 8px 16px; border-radius: 8px; border: none; background: none; }
+.tab:hover { color: var(--text); background: var(--bg3); }
+.tab.active { color: var(--text); background: var(--bg3); font-weight: 500; }
+
+/* CONTENT */
+.content { max-width: 760px; margin: 0 auto; padding: 24px; }
+.panel { display: none; }
+.panel.active { display: block; }
+
+/* FORM */
+.field { margin-bottom: 18px; }
+.field label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+.field input, .field textarea, .field select {
+  width: 100%; background: var(--bg3); border: 0.5px solid var(--border);
+  border-radius: 10px; padding: 10px 14px; font-size: 14px; color: var(--text);
+  outline: none; font-family: inherit; resize: vertical;
+}
+.field input:focus, .field textarea:focus, .field select:focus { border-color: var(--blue); }
+.field textarea { min-height: 200px; line-height: 1.6; }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.field-row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+.toggle-row { display: flex; align-items: center; gap: 10px; }
+.toggle { width: 38px; height: 22px; background: var(--border); border-radius: 11px; cursor: pointer; position: relative; border: none; transition: background 0.2s; }
+.toggle.on { background: var(--blue); }
+.toggle::after { content: ''; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; background: #fff; border-radius: 50%; transition: left 0.2s; }
+.toggle.on::after { left: 19px; }
+.toggle-label { font-size: 13px; color: var(--muted); }
+
+/* ACTION BAR */
+.action-bar { display: flex; align-items: center; gap: 12px; margin-top: 24px; padding-top: 20px; border-top: 0.5px solid var(--border); }
+.btn-primary { background: var(--blue); color: #fff; border: none; border-radius: 10px; padding: 11px 28px; font-size: 14px; font-weight: 600; cursor: pointer; transition: opacity 0.15s; }
+.btn-primary:hover { opacity: 0.85; }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-secondary { background: var(--bg3); color: var(--muted); border: 0.5px solid var(--border); border-radius: 10px; padding: 11px 20px; font-size: 14px; cursor: pointer; }
+.btn-secondary:hover { color: var(--text); }
+
+/* STATUS */
+.status { font-size: 13px; margin-left: auto; display: flex; align-items: center; gap: 6px; }
+.status.loading { color: var(--muted); }
+.status.success { color: var(--green); }
+.status.error { color: var(--red); }
+.spinner { width: 14px; height: 14px; border: 2px solid var(--border); border-top-color: var(--blue); border-radius: 50%; animation: spin 0.7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* SETTINGS */
+.settings-section { background: var(--bg3); border: 0.5px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+.settings-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 16px; }
+.token-display { font-family: monospace; font-size: 12px; color: var(--muted); word-break: break-all; margin-top: 8px; }
+.info-box { background: var(--blue-bg); border: 0.5px solid var(--blue-border); border-radius: 8px; padding: 12px 14px; font-size: 12px; color: var(--muted); line-height: 1.6; margin-bottom: 16px; }
+.info-box strong { color: var(--text); }
+
+/* PREVIEW */
+.preview-box { background: var(--bg2); border: 0.5px solid var(--border); border-radius: 10px; padding: 16px; font-family: monospace; font-size: 12px; color: var(--muted); white-space: pre-wrap; word-break: break-all; max-height: 300px; overflow-y: auto; margin-top: 16px; display: none; }
+</style>
+</head>
+<body>
+
+<!-- GATE -->
+<div class="gate" id="gate">
+  <div class="gate-card">
+    <div class="gate-logo">Respawn<span>MN</span></div>
+    <div class="gate-sub">Admin хэсэг</div>
+    <input class="gate-input" type="password" id="pw-input" placeholder="Нууц үг" onkeydown="if(event.key==='Enter')login()">
+    <button class="gate-btn" onclick="login()">Нэвтрэх</button>
+    <div class="gate-err" id="pw-err">Нууц үг буруу байна</div>
+    <div class="setup-hint" id="setup-hint" style="display:none">
+      Эхний удаа тохируулж байна.<br>
+      <a onclick="setupPassword()">Нууц үг тохируулах</a>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" style="display:none">
+  <header>
+    <div class="h-logo">Respawn<span>MN</span></div>
+    <span class="h-badge">Admin</span>
+    <div class="h-right">
+      <a class="h-btn" href="/" target="_blank">Сайт харах ↗</a>
+      <button class="h-btn" onclick="logout()">Гарах</button>
+    </div>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('mn', this)">📝 Монгол мэдээ</button>
+    <button class="tab" onclick="showTab('en', this)">🌐 Англиас орчуулах</button>
+    <button class="tab" onclick="showTab('settings', this)">⚙️ Тохиргоо</button>
+  </div>
+
+  <!-- TAB: MONGOLIAN -->
+  <div class="content">
+    <div class="panel active" id="panel-mn">
+      <div class="field">
+        <label>Гарчиг</label>
+        <input type="text" id="mn-title" placeholder="Мэдээний гарчиг...">
+      </div>
+      <div class="field">
+        <label>Агуулга (Markdown)</label>
+        <textarea id="mn-body" placeholder="Мэдээний агуулгыг Markdown форматаар бичнэ..."></textarea>
+      </div>
+      <div class="field-row3">
+        <div class="field">
+          <label>Төрөл</label>
+          <select id="mn-category">
+            <option>Мэдээ</option>
+            <option>Review</option>
+            <option>Зөвлөгөө</option>
+            <option>Нийтлэл</option>
+            <option>Esports</option>
+            <option>Top list</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Badge өнгө</label>
+          <select id="mn-badge">
+            <option value="badge-blue">Цэнхэр</option>
+            <option value="badge-green">Ногоон</option>
+            <option value="badge-purple">Нил ягаан</option>
+            <option value="badge-red">Улаан</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Огноо</label>
+          <input type="date" id="mn-date">
+        </div>
+      </div>
+      <div class="toggle-row">
+        <button class="toggle" id="mn-featured-toggle" onclick="toggleBtn(this)"></button>
+        <span class="toggle-label">Онцлох мэдээ (hero дээр гарна)</span>
+      </div>
+      <div class="action-bar">
+        <button class="btn-secondary" onclick="previewPost('mn')">Preview</button>
+        <button class="btn-primary" id="mn-submit" onclick="submitMn()">Нийтлэх →</button>
+        <div class="status" id="mn-status"></div>
+      </div>
+      <div class="preview-box" id="mn-preview"></div>
+    </div>
+
+    <!-- TAB: ENGLISH → TRANSLATE -->
+    <div class="panel" id="panel-en">
+      <div class="info-box">
+        <strong>Автомат орчуулга</strong> — Англи мэдээ оруулахад Claude AI Монгол хэл рүү орчуулж, автоматаар нийтэлнэ.<br>
+        GitHub Secrets дотор <strong>ANTHROPIC_API_KEY</strong> тохируулсан байх шаардлагатай.
+      </div>
+      <div class="field">
+        <label>Англи гарчиг</label>
+        <input type="text" id="en-title" placeholder="English title of the article...">
+      </div>
+      <div class="field">
+        <label>Англи агуулга</label>
+        <textarea id="en-body" placeholder="Paste the full English article here..."></textarea>
+      </div>
+      <div class="field-row3">
+        <div class="field">
+          <label>Төрөл</label>
+          <select id="en-category">
+            <option>Мэдээ</option>
+            <option>Review</option>
+            <option>Зөвлөгөө</option>
+            <option>Нийтлэл</option>
+            <option>Esports</option>
+            <option>Top list</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Badge өнгө</label>
+          <select id="en-badge">
+            <option value="badge-blue">Цэнхэр</option>
+            <option value="badge-green">Ногоон</option>
+            <option value="badge-purple">Нил ягаан</option>
+            <option value="badge-red">Улаан</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Огноо</label>
+          <input type="date" id="en-date">
+        </div>
+      </div>
+      <div class="toggle-row">
+        <button class="toggle" id="en-featured-toggle" onclick="toggleBtn(this)"></button>
+        <span class="toggle-label">Онцлох мэдээ</span>
+      </div>
+      <div class="action-bar">
+        <button class="btn-primary" id="en-submit" onclick="submitEn()">Орчуулж нийтлэх →</button>
+        <div class="status" id="en-status"></div>
+      </div>
+    </div>
+
+    <!-- TAB: SETTINGS -->
+    <div class="panel" id="panel-settings">
+      <div class="settings-section">
+        <div class="settings-title">GitHub тохиргоо</div>
+        <div class="field">
+          <label>GitHub Personal Access Token</label>
+          <input type="password" id="s-token" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
+          <div class="token-display" id="token-hint"></div>
+        </div>
+        <div class="field">
+          <label>Repository (owner/repo)</label>
+          <input type="text" id="s-repo" placeholder="tsekseven69/respawn">
+        </div>
+        <button class="btn-primary" onclick="saveSettings()">Хадгалах</button>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-title">Нууц үг солих</div>
+        <div class="field">
+          <label>Шинэ нууц үг</label>
+          <input type="password" id="s-newpw" placeholder="Шинэ нууц үг">
+        </div>
+        <div class="field">
+          <label>Нууц үг давтах</label>
+          <input type="password" id="s-newpw2" placeholder="Дахин оруулна уу">
+        </div>
+        <button class="btn-primary" onclick="changePassword()">Нууц үг солих</button>
+        <div class="status" id="pw-status" style="margin-top:10px;"></div>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-title">GitHub Actions орчуулга тохиргоо</div>
+        <div class="info-box">
+          <strong>ANTHROPIC_API_KEY</strong> — GitHub репо → Settings → Secrets → Actions дотор нэмэх шаардлагатай.<br><br>
+          GitHub Token-д дараах permission хэрэгтэй:<br>
+          • <strong>repo</strong> (Contents: write)<br>
+          • <strong>actions</strong> (Workflows: write)
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const STORAGE = {
+  PW_HASH: 'rmn_pw_hash',
+  TOKEN: 'rmn_gh_token',
+  REPO: 'rmn_gh_repo',
+  SESSION: 'rmn_session',
+}
+
+// --- Auth ---
+async function sha256(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str))
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('')
+}
+
+async function login() {
+  const pw = document.getElementById('pw-input').value
+  if (!pw) return
+  const hash = await sha256(pw)
+  const stored = localStorage.getItem(STORAGE.PW_HASH)
+
+  if (!stored) {
+    document.getElementById('setup-hint').style.display = 'block'
+    return
+  }
+  if (hash === stored) {
+    sessionStorage.setItem(STORAGE.SESSION, '1')
+    showApp()
+  } else {
+    document.getElementById('pw-err').style.display = 'block'
+    setTimeout(() => document.getElementById('pw-err').style.display = 'none', 3000)
+  }
+}
+
+async function setupPassword() {
+  const pw = document.getElementById('pw-input').value
+  if (!pw || pw.length < 6) { alert('Нууц үг хамгийн багадаа 6 тэмдэгт байх хэрэгтэй'); return }
+  const hash = await sha256(pw)
+  localStorage.setItem(STORAGE.PW_HASH, hash)
+  sessionStorage.setItem(STORAGE.SESSION, '1')
+  showApp()
+}
+
+function logout() {
+  sessionStorage.removeItem(STORAGE.SESSION)
+  location.reload()
+}
+
+function showApp() {
+  document.getElementById('gate').style.display = 'none'
+  document.getElementById('app').style.display = 'block'
+  loadSettings()
+  // Default today's date
+  const today = new Date().toISOString().split('T')[0]
+  document.getElementById('mn-date').value = today
+  document.getElementById('en-date').value = today
+}
+
+// Check session
+window.addEventListener('DOMContentLoaded', () => {
+  const hasPw = !!localStorage.getItem(STORAGE.PW_HASH)
+  if (!hasPw) document.getElementById('setup-hint').style.display = 'block'
+  if (sessionStorage.getItem(STORAGE.SESSION)) showApp()
+})
+
+// --- Settings ---
+function loadSettings() {
+  const token = localStorage.getItem(STORAGE.TOKEN) || ''
+  const repo = localStorage.getItem(STORAGE.REPO) || 'tsekseven69/respawn'
+  document.getElementById('s-token').value = token
+  document.getElementById('s-repo').value = repo
+  if (token) document.getElementById('token-hint').textContent = `Хадгалагдсан: ${token.slice(0, 8)}...`
+}
+
+function saveSettings() {
+  const token = document.getElementById('s-token').value.trim()
+  const repo = document.getElementById('s-repo').value.trim()
+  if (!token || !repo) { alert('Token болон Repo талбарыг бөглөнө үү'); return }
+  localStorage.setItem(STORAGE.TOKEN, token)
+  localStorage.setItem(STORAGE.REPO, repo)
+  document.getElementById('token-hint').textContent = `Хадгалагдсан: ${token.slice(0, 8)}...`
+  alert('✅ Тохиргоо хадгалагдлаа')
+}
+
+async function changePassword() {
+  const pw1 = document.getElementById('s-newpw').value
+  const pw2 = document.getElementById('s-newpw2').value
+  const el = document.getElementById('pw-status')
+  if (!pw1 || pw1.length < 6) { setStatus(el, 'error', 'Хамгийн багадаа 6 тэмдэгт'); return }
+  if (pw1 !== pw2) { setStatus(el, 'error', 'Нууц үг таарахгүй байна'); return }
+  const hash = await sha256(pw1)
+  localStorage.setItem(STORAGE.PW_HASH, hash)
+  setStatus(el, 'success', '✅ Нууц үг солигдлоо')
+}
+
+// --- UI helpers ---
+function showTab(name, btn) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'))
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'))
+  document.getElementById('panel-' + name).classList.add('active')
+  btn.classList.add('active')
+}
+
+function toggleBtn(el) {
+  el.classList.toggle('on')
+}
+
+function setStatus(el, type, msg) {
+  el.className = 'status ' + type
+  el.innerHTML = type === 'loading'
+    ? `<div class="spinner"></div> ${msg}`
+    : msg
+}
+
+// --- Build post markdown ---
+function buildSlug(title) {
+  return title.toLowerCase()
+    .replace(/[^a-zа-яөүё0-9\s-]/gi, '')
+    .trim().replace(/\s+/g, '-').slice(0, 60) || 'post'
+}
+
+function buildMarkdown(title, body, opts) {
+  const date = opts.date || new Date().toISOString().split('T')[0]
+  const slug = buildSlug(title)
+  const filename = `_posts/${date}-${slug}.md`
+  const excerpt = body.replace(/[#*_`>]/g, '').split('\n').filter(l => l.trim())[0]?.slice(0, 120) || ''
+  const content = `---
+title: "${title.replace(/"/g, "'")}"
+date: ${date} 10:00:00 +0800
+category: ${opts.category}
+badge: ${opts.badge}
+thumb: ${['a','b','c','d','e','f'][Math.floor(Math.random()*6)]}
+featured: ${opts.featured}
+excerpt: "${excerpt}"
+---
+
+${body.trim()}`
+  return { filename, content }
+}
+
+// --- GitHub API ---
+async function commitFile(filename, content, message) {
+  const token = localStorage.getItem(STORAGE.TOKEN)
+  const repo = localStorage.getItem(STORAGE.REPO)
+  if (!token || !repo) { alert('Тохиргоо → GitHub Token болон Repo тохируулна уу'); return false }
+
+  const url = `https://api.github.com/repos/${repo}/contents/${filename}`
+  const encoded = btoa(unescape(encodeURIComponent(content)))
+
+  // Check existing SHA
+  let sha
+  try {
+    const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } })
+    if (res.ok) sha = (await res.json()).sha
+  } catch {}
+
+  const body = { message, content: encoded, branch: 'main' }
+  if (sha) body.sha = sha
+
+  const res = await fetch(url, {
+    method: 'PUT',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  })
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}))
+    throw new Error(err.message || `GitHub API error: ${res.status}`)
+  }
+  return true
+}
+
+async function triggerTranslation(inputs) {
+  const token = localStorage.getItem(STORAGE.TOKEN)
+  const repo = localStorage.getItem(STORAGE.REPO)
+  if (!token || !repo) { alert('Тохиргоо → GitHub Token болон Repo тохируулна уу'); return false }
+
+  // base64 encode body to handle special chars
+  const bodyB64 = btoa(unescape(encodeURIComponent(inputs.body)))
+
+  const res = await fetch(`https://api.github.com/repos/${repo}/actions/workflows/translate.yml/dispatches`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      ref: 'main',
+      inputs: {
+        title: inputs.title,
+        body_b64: bodyB64,
+        category: inputs.category,
+        badge: inputs.badge,
+        featured: inputs.featured,
+        date: inputs.date,
+      }
+    })
+  })
+
+  if (!res.ok && res.status !== 204) {
+    const err = await res.json().catch(() => ({}))
+    throw new Error(err.message || `Workflow trigger failed: ${res.status}`)
+  }
+  return true
+}
+
+// --- Submit Mongolian ---
+async function submitMn() {
+  const title = document.getElementById('mn-title').value.trim()
+  const body = document.getElementById('mn-body').value.trim()
+  const category = document.getElementById('mn-category').value
+  const badge = document.getElementById('mn-badge').value
+  const date = document.getElementById('mn-date').value
+  const featured = document.getElementById('mn-featured-toggle').classList.contains('on')
+  const statusEl = document.getElementById('mn-status')
+  const btn = document.getElementById('mn-submit')
+
+  if (!title || !body) { alert('Гарчиг болон агуулга шаардлагатай'); return }
+
+  btn.disabled = true
+  setStatus(statusEl, 'loading', 'Нийтэлж байна...')
+
+  try {
+    const { filename, content } = buildMarkdown(title, body, { category, badge, date, featured })
+    await commitFile(filename, content, `post: ${title}`)
+    setStatus(statusEl, 'success', '✅ Амжилттай нийтлэгдлээ! (~2 мин дараа сайтад гарна)')
+    document.getElementById('mn-title').value = ''
+    document.getElementById('mn-body').value = ''
+    document.getElementById('mn-preview').style.display = 'none'
+  } catch (e) {
+    setStatus(statusEl, 'error', '❌ ' + e.message)
+  } finally {
+    btn.disabled = false
+  }
+}
+
+// --- Submit English (trigger workflow) ---
+async function submitEn() {
+  const title = document.getElementById('en-title').value.trim()
+  const body = document.getElementById('en-body').value.trim()
+  const category = document.getElementById('en-category').value
+  const badge = document.getElementById('en-badge').value
+  const date = document.getElementById('en-date').value
+  const featured = document.getElementById('en-featured-toggle').classList.contains('on')
+  const statusEl = document.getElementById('en-status')
+  const btn = document.getElementById('en-submit')
+
+  if (!title || !body) { alert('Гарчиг болон агуулга шаардлагатай'); return }
+
+  btn.disabled = true
+  setStatus(statusEl, 'loading', 'Claude-д илгээж байна...')
+
+  try {
+    await triggerTranslation({ title, body, category, badge, date: date || '', featured: featured.toString() })
+    setStatus(statusEl, 'success', '✅ GitHub Actions эхэллээ. Орчуулж дуусаад автоматаар нийтлэгдэнэ (~3-5 мин)')
+    document.getElementById('en-title').value = ''
+    document.getElementById('en-body').value = ''
+  } catch (e) {
+    setStatus(statusEl, 'error', '❌ ' + e.message)
+  } finally {
+    btn.disabled = false
+  }
+}
+
+// --- Preview ---
+function previewPost(mode) {
+  const title = document.getElementById(`${mode}-title`).value.trim()
+  const body = document.getElementById(`${mode}-body`).value.trim()
+  const category = document.getElementById(`${mode}-category`).value
+  const badge = document.getElementById(`${mode}-badge`).value
+  const date = document.getElementById(`${mode}-date`).value
+  const featured = document.getElementById(`${mode}-featured-toggle`).classList.contains('on')
+
+  if (!title) { alert('Гарчиг оруулна уу'); return }
+
+  const { filename, content } = buildMarkdown(title, body || '(агуулга байхгүй)', { category, badge, date, featured })
+  const box = document.getElementById(`${mode}-preview`)
+  box.textContent = `📁 ${filename}\n\n${content}`
+  box.style.display = 'block'
+}
+</script>
+</body>
+</html>

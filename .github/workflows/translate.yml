@@ -1,0 +1,60 @@
+name: Translate and Publish Post
+
+on:
+  workflow_dispatch:
+    inputs:
+      title:
+        description: "English title"
+        required: true
+      body_b64:
+        description: "English body (base64 encoded)"
+        required: true
+      category:
+        description: "Category"
+        default: "Мэдээ"
+      badge:
+        description: "Badge class"
+        default: "badge-blue"
+      featured:
+        description: "Featured post (true/false)"
+        default: "false"
+      date:
+        description: "Date YYYY-MM-DD (empty = today)"
+        default: ""
+
+jobs:
+  translate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Decode body and translate
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          POST_TITLE: ${{ github.event.inputs.title }}
+          POST_BODY_B64: ${{ github.event.inputs.body_b64 }}
+          POST_CATEGORY: ${{ github.event.inputs.category }}
+          POST_BADGE: ${{ github.event.inputs.badge }}
+          POST_FEATURED: ${{ github.event.inputs.featured }}
+          POST_DATE: ${{ github.event.inputs.date }}
+        run: node scripts/translate-post.mjs --from-env
+
+      - name: Commit and push
+        run: |
+          git config user.name "RespawnMN Bot"
+          git config user.email "bot@respawnmn.site"
+          git add _posts/
+          git diff --staged --quiet || git commit -m "post: translated article"
+          git push
