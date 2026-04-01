@@ -207,16 +207,19 @@ export default {
         const chartsData = await chartsRes.json()
         const ranks = (chartsData.response?.ranks || []).slice(0, 20)
 
-        const appids = ranks.map(r => r.appid).join(',')
         let nameMap = {}
         try {
-          const detailsRes = await fetch(`${STORE_BASE}/api/appdetails?appids=${appids}&filters=basic`, {
-            headers: { 'User-Agent': 'RespawnMN/1.0' },
-          })
-          const detailsData = await detailsRes.json()
-          for (const r of ranks) {
-            nameMap[r.appid] = detailsData[r.appid]?.data?.name || ''
-          }
+          const nameResults = await Promise.all(
+            ranks.map(r =>
+              fetch(`${STORE_BASE}/api/appdetails?appids=${r.appid}&filters=basic`, {
+                headers: { 'User-Agent': 'RespawnMN/1.0' },
+              })
+                .then(res => res.json())
+                .then(d => [String(r.appid), d[r.appid]?.data?.name || ''])
+                .catch(() => [String(r.appid), ''])
+            )
+          )
+          nameMap = Object.fromEntries(nameResults)
         } catch (_) {}
 
         const games = ranks.map(r => ({
@@ -270,8 +273,28 @@ export default {
           history: points,
         })
 
+      } else if (action === 'gamedetail') {
+        const appid = url.searchParams.get('appid')
+        if (!appid) return json({ error: 'appid шаардлагатай' }, 400)
+        const res = await fetch(`${STORE_BASE}/api/appdetails?appids=${appid}&l=english`)
+        const data = await res.json()
+        const d = data[appid]?.data
+        if (!d) return json({ error: 'Тоглоом олдсонгүй' }, 404)
+        return json({
+          appid: d.steam_appid,
+          name: d.name,
+          description: d.short_description || '',
+          genres: (d.genres || []).map(g => g.description),
+          developers: d.developers || [],
+          releaseDate: d.release_date?.date || '',
+          isFree: d.is_free,
+          price: d.price_overview?.final_formatted || '',
+          headerImage: d.header_image || '',
+          metacritic: d.metacritic?.score || null,
+        })
+
       } else {
-        return json({ error: 'action parameter буруу. deals | steamnews | comingsoon | topgames | pricehistory | resolve | profile | games | recent' }, 400)
+        return json({ error: 'action parameter буруу. deals | steamnews | comingsoon | topgames | pricehistory | gamedetail | resolve | profile | games | recent' }, 400)
       }
 
     } catch (err) {

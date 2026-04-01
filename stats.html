@@ -18,9 +18,10 @@ title: Тоглоомын статистик
 .stats-thead th:not(:first-child) { text-align: right; }
 
 .stats-row {
-  border-bottom: 1px solid var(--border); transition: background 0.15s; cursor: default;
+  border-bottom: 1px solid var(--border); transition: background 0.15s; cursor: pointer;
 }
-.stats-row:hover { background: rgba(255,255,255,0.03); }
+.stats-row:hover { background: rgba(255,255,255,0.04); }
+.stats-row.selected { background: rgba(88,101,242,0.08); border-left: 3px solid #5865f2; }
 .stats-row td { padding: 12px; vertical-align: middle; }
 .stats-row td:not(:first-child) { text-align: right; }
 
@@ -31,7 +32,7 @@ title: Тоглоомын статистик
 
 .stats-game-cell { display: flex; align-items: center; gap: 12px; }
 .stats-game-img { width: 80px; height: 37px; object-fit: cover; border-radius: 5px; background: var(--border); flex-shrink: 0; }
-.stats-game-name { font-size: 14px; font-weight: 600; color: var(--text); }
+.stats-game-name { font-size: 14px; font-weight: 600; color: var(--text); text-align: left; }
 .stats-game-link { font-size: 11px; color: #5865f2; text-decoration: none; }
 .stats-game-link:hover { text-decoration: underline; }
 
@@ -50,9 +51,75 @@ title: Тоглоомын статистик
 
 .stats-updated { font-size: 12px; color: var(--muted); margin-top: 12px; }
 
+/* Game detail panel */
+.game-detail-overlay {
+  display: none; position: fixed; inset: 0; z-index: 1000;
+  background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
+}
+.game-detail-overlay.open { display: block; }
+.game-detail-panel {
+  position: fixed; top: 0; right: 0; bottom: 0; width: 420px; max-width: 100%;
+  background: var(--bg2, #1a1a1a); border-left: 1px solid var(--border);
+  overflow-y: auto; z-index: 1001; display: flex; flex-direction: column;
+}
+.game-detail-hero { width: 100%; height: 180px; object-fit: cover; display: block; background: var(--border); }
+.game-detail-body { padding: 20px; flex: 1; }
+.game-detail-name { font-size: 20px; font-weight: 800; color: var(--text); margin-bottom: 8px; }
+.game-detail-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+.game-detail-tag {
+  font-size: 11px; padding: 2px 8px; border-radius: 10px;
+  background: rgba(255,255,255,0.07); color: var(--muted);
+}
+.game-detail-desc { font-size: 13px; color: var(--muted); line-height: 1.7; margin-bottom: 16px; }
+.game-detail-info { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+.game-detail-links { display: flex; gap: 8px; margin-bottom: 24px; }
+.game-detail-steam-btn {
+  padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600;
+  background: #1b2838; color: #c7d5e0; border: 1px solid #4c6b22;
+  text-decoration: none;
+}
+.game-detail-close {
+  position: absolute; top: 12px; right: 14px; background: rgba(0,0,0,0.6);
+  border: none; color: #fff; width: 32px; height: 32px; border-radius: 50%;
+  font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  z-index: 10;
+}
+
+/* Comments */
+.comments-section { border-top: 1px solid var(--border); padding-top: 20px; }
+.comments-title { font-size: 15px; font-weight: 700; margin-bottom: 16px; color: var(--text); }
+.comment-form { margin-bottom: 20px; }
+.comment-input {
+  width: 100%; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border);
+  background: var(--card); color: var(--text); font-size: 13px; outline: none;
+  margin-bottom: 8px; box-sizing: border-box;
+}
+.comment-input:focus { border-color: #5865f2; }
+.comment-textarea {
+  width: 100%; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border);
+  background: var(--card); color: var(--text); font-size: 13px; outline: none;
+  resize: vertical; min-height: 72px; box-sizing: border-box; font-family: inherit;
+}
+.comment-textarea:focus { border-color: #5865f2; }
+.comment-submit {
+  padding: 8px 16px; border-radius: 8px; border: none;
+  background: #5865f2; color: #fff; font-size: 13px; font-weight: 600;
+  cursor: pointer; margin-top: 8px;
+}
+.comment-submit:hover { background: #4752c4; }
+
+.comment-item { padding: 12px; background: var(--card); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 8px; }
+.comment-author { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+.comment-text { font-size: 13px; color: var(--muted); line-height: 1.5; }
+.comment-date { font-size: 11px; color: var(--muted); margin-top: 4px; }
+.comment-empty { font-size: 13px; color: var(--muted); text-align: center; padding: 16px 0; }
+
+.detail-loading { text-align: center; padding: 40px; color: var(--muted); }
+
 @media (max-width: 580px) {
   .stats-thead th.hide-mobile, .stats-row td.hide-mobile { display: none; }
   .stats-game-img { width: 50px; height: 23px; }
+  .game-detail-panel { width: 100%; border-left: none; border-top: 1px solid var(--border); top: auto; height: 80vh; }
 }
 </style>
 
@@ -63,7 +130,7 @@ title: Тоглоомын статистик
 
   <div class="stats-section">
     <div class="stats-section-title">🏆 Хамгийн их тоглогдсон 20 тоглоом</div>
-    <div class="stats-section-sub">Steam Charts · Peak concurrent players</div>
+    <div class="stats-section-sub">Steam Charts · Peak concurrent players · Тоглоом дээр дарж дэлгэрэнгүй харна уу</div>
 
     <div id="stats-body">
       {% for i in (1..10) %}
@@ -75,8 +142,16 @@ title: Тоглоомын статистик
 </div>
 </main>
 
+<!-- Game Detail Panel -->
+<div class="game-detail-overlay" id="gd-overlay" onclick="closeDetail(event)"></div>
+<div class="game-detail-panel" id="gd-panel" style="display:none;">
+  <button class="game-detail-close" onclick="closeDetailPanel()">✕</button>
+  <div id="gd-content"></div>
+</div>
+
 <script>
 const WORKER_URL = 'https://respawnmn-steam-api.tsekseven69.workers.dev'
+let selectedAppid = null
 
 function fmt(n) {
   if (!n) return '—'
@@ -123,14 +198,14 @@ async function loadStats() {
           const rankCls = i === 0 ? 'stats-rank-1' : i === 1 ? 'stats-rank-2' : i === 2 ? 'stats-rank-3' : ''
           const barWidth = Math.round((g.peakPlayers / maxPlayers) * 80)
           return `
-          <tr class="stats-row">
+          <tr class="stats-row" onclick="openDetail(${g.appid}, '${esc(g.name)}', this)">
             <td><span class="stats-rank ${rankCls}">${i+1}</span></td>
             <td>
               <div class="stats-game-cell">
                 <img class="stats-game-img" src="${g.image}" alt="" onerror="this.style.display='none'">
                 <div>
                   <div class="stats-game-name">${esc(g.name)}</div>
-                  <a class="stats-game-link" href="https://store.steampowered.com/app/${g.appid}/" target="_blank" rel="noopener">Steam →</a>
+                  <a class="stats-game-link" href="https://store.steampowered.com/app/${g.appid}/" target="_blank" rel="noopener" onclick="event.stopPropagation()">Steam →</a>
                 </div>
               </div>
             </td>
@@ -155,6 +230,140 @@ async function loadStats() {
     document.getElementById('stats-body').innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted);">Холбогдож чадсангүй. Дахин оролдоно уу.</div>'
   }
 }
+
+async function openDetail(appid, name, rowEl) {
+  // Highlight row
+  document.querySelectorAll('.stats-row').forEach(r => r.classList.remove('selected'))
+  rowEl.classList.add('selected')
+  selectedAppid = appid
+
+  const overlay = document.getElementById('gd-overlay')
+  const panel = document.getElementById('gd-panel')
+  const content = document.getElementById('gd-content')
+
+  overlay.classList.add('open')
+  panel.style.display = 'flex'
+  panel.style.flexDirection = 'column'
+
+  content.innerHTML = `<div class="detail-loading">⏳ Уншиж байна...</div>`
+
+  try {
+    const url = new URL(WORKER_URL)
+    url.searchParams.set('action', 'gamedetail')
+    url.searchParams.set('appid', appid)
+    const res = await fetch(url)
+    const d = await res.json()
+
+    if (d.error) {
+      content.innerHTML = renderDetailFallback(appid, name)
+      renderComments(appid)
+      return
+    }
+
+    const genres = (d.genres || []).map(g => `<span class="game-detail-tag">${esc(g)}</span>`).join('')
+    const metaScore = d.metacritic ? `<span class="game-detail-tag" style="color:#66c0f4">Metacritic: ${d.metacritic}</span>` : ''
+    const priceStr = d.isFree ? '<span class="game-detail-tag" style="color:#57cbde">Үнэгүй</span>' : d.price ? `<span class="game-detail-tag" style="color:#a4d007">${esc(d.price)}</span>` : ''
+
+    content.innerHTML = `
+      <img class="game-detail-hero" src="https://cdn.cloudflare.steamstatic.com/steam/apps/${appid}/header.jpg" alt="" onerror="this.style.display='none'">
+      <div class="game-detail-body">
+        <div class="game-detail-name">${esc(d.name || name)}</div>
+        <div class="game-detail-meta">
+          ${priceStr}
+          ${metaScore}
+          ${genres}
+        </div>
+        ${d.releaseDate ? `<div class="game-detail-info">📅 ${esc(d.releaseDate)}</div>` : ''}
+        ${d.developers?.length ? `<div class="game-detail-info">🛠 ${esc(d.developers.join(', '))}</div>` : ''}
+        <div class="game-detail-desc">${esc(d.description || '')}</div>
+        <div class="game-detail-links">
+          <a class="game-detail-steam-btn" href="https://store.steampowered.com/app/${appid}/" target="_blank" rel="noopener">Steam дэлгүүр →</a>
+        </div>
+        <div class="comments-section" id="comments-section-${appid}"></div>
+      </div>`
+
+    renderComments(appid)
+  } catch(e) {
+    content.innerHTML = renderDetailFallback(appid, name)
+    renderComments(appid)
+  }
+}
+
+function renderDetailFallback(appid, name) {
+  return `
+    <img class="game-detail-hero" src="https://cdn.cloudflare.steamstatic.com/steam/apps/${appid}/header.jpg" alt="" onerror="this.style.display='none'">
+    <div class="game-detail-body">
+      <div class="game-detail-name">${esc(name)}</div>
+      <div class="game-detail-links">
+        <a class="game-detail-steam-btn" href="https://store.steampowered.com/app/${appid}/" target="_blank" rel="noopener">Steam дэлгүүр →</a>
+      </div>
+      <div class="comments-section" id="comments-section-${appid}"></div>
+    </div>`
+}
+
+function getComments(appid) {
+  try { return JSON.parse(localStorage.getItem('rmn_comments_' + appid) || '[]') } catch { return [] }
+}
+
+function saveComments(appid, comments) {
+  localStorage.setItem('rmn_comments_' + appid, JSON.stringify(comments))
+}
+
+function renderComments(appid) {
+  const section = document.getElementById('comments-section-' + appid)
+  if (!section) return
+  const comments = getComments(appid)
+  section.innerHTML = `
+    <div class="comments-title">💬 Сэтгэгдэл (${comments.length})</div>
+    <div class="comment-form">
+      <input class="comment-input" id="cmt-name-${appid}" placeholder="Нэр..." maxlength="40">
+      <textarea class="comment-textarea" id="cmt-text-${appid}" placeholder="Сэтгэгдэл бичнэ үү..." maxlength="500"></textarea>
+      <button class="comment-submit" onclick="submitComment(${appid})">Нийтлэх</button>
+    </div>
+    <div id="cmt-list-${appid}">
+      ${comments.length
+        ? comments.map(c => `
+          <div class="comment-item">
+            <div class="comment-author">${esc(c.author)}</div>
+            <div class="comment-text">${esc(c.text)}</div>
+            <div class="comment-date">${c.date}</div>
+          </div>`).join('')
+        : '<div class="comment-empty">Одоогоор сэтгэгдэл байхгүй байна. Эхлэгч бай!</div>'
+      }
+    </div>`
+}
+
+function submitComment(appid) {
+  const nameEl = document.getElementById('cmt-name-' + appid)
+  const textEl = document.getElementById('cmt-text-' + appid)
+  const name = nameEl.value.trim()
+  const text = textEl.value.trim()
+  if (!name || !text) return
+  const comments = getComments(appid)
+  comments.unshift({
+    author: name,
+    text,
+    date: new Date().toLocaleString('mn-MN'),
+  })
+  saveComments(appid, comments)
+  nameEl.value = ''
+  textEl.value = ''
+  renderComments(appid)
+}
+
+function closeDetail(e) {
+  if (e.target !== document.getElementById('gd-overlay')) return
+  closeDetailPanel()
+}
+
+function closeDetailPanel() {
+  document.getElementById('gd-overlay').classList.remove('open')
+  document.getElementById('gd-panel').style.display = 'none'
+  document.querySelectorAll('.stats-row').forEach(r => r.classList.remove('selected'))
+  selectedAppid = null
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDetailPanel() })
 
 function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
 

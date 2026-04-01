@@ -5,38 +5,6 @@ layout: default
 <style>
 .home-wrap { max-width: 1100px; margin: 0 auto; padding: 24px 16px; }
 
-/* Hero deal */
-.hero-deal {
-  position: relative; border-radius: 16px; overflow: hidden;
-  margin-bottom: 36px; min-height: 260px; display: flex; align-items: flex-end;
-  background: var(--card); border: 1px solid var(--border);
-  text-decoration: none; color: inherit;
-}
-.hero-deal-img {
-  position: absolute; inset: 0; width: 100%; height: 100%;
-  object-fit: cover; display: block;
-}
-.hero-deal-overlay {
-  position: absolute; inset: 0;
-  background: linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.3) 60%, transparent 100%);
-}
-.hero-deal-body {
-  position: relative; z-index: 1; padding: 28px; width: 100%;
-}
-.hero-deal-tag { font-size: 12px; font-weight: 600; color: #a4d007; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
-.hero-deal-name { font-size: 28px; font-weight: 800; color: #fff; margin-bottom: 14px; line-height: 1.2; }
-.hero-deal-price { display: flex; align-items: center; gap: 12px; }
-.deal-badge-lg { background: #4c6b22; color: #a4d007; font-size: 22px; font-weight: 800; padding: 6px 14px; border-radius: 6px; }
-.deal-orig-lg { color: #888; font-size: 16px; text-decoration: line-through; }
-.deal-final-lg { color: #fff; font-size: 22px; font-weight: 700; }
-.hero-buy-btn {
-  margin-left: auto; background: #1b2838; color: #c7d5e0;
-  border: 1px solid #4c6b22; border-radius: 8px; padding: 10px 20px;
-  font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap;
-  text-decoration: none; display: inline-block;
-}
-.hero-buy-btn:hover { background: #2a475e; }
-
 /* Section */
 .home-section { margin-bottom: 40px; }
 .home-section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
@@ -79,24 +47,6 @@ layout: default
 .seller-price { font-size: 13px; color: var(--muted); flex-shrink: 0; }
 .seller-disc { color: #a4d007; font-size: 12px; font-weight: 700; margin-left: 6px; }
 
-/* Profile banner */
-.profile-banner {
-  display: flex; align-items: center; gap: 16px; padding: 20px 24px;
-  background: linear-gradient(135deg, #1b2838 0%, #2a475e 100%);
-  border: 1px solid #4c6b22; border-radius: 14px; margin-bottom: 40px;
-  text-decoration: none; color: inherit;
-}
-.profile-banner:hover { border-color: #a4d007; }
-.profile-banner-icon { font-size: 36px; flex-shrink: 0; }
-.profile-banner-info { flex: 1; }
-.profile-banner-title { font-size: 16px; font-weight: 700; color: #c7d5e0; margin-bottom: 4px; }
-.profile-banner-sub { font-size: 13px; color: #7a9db5; }
-.profile-banner-btn {
-  background: #4c6b22; color: #a4d007; border: none; border-radius: 8px;
-  padding: 10px 18px; font-size: 13px; font-weight: 700; cursor: pointer;
-  white-space: nowrap; flex-shrink: 0;
-}
-
 /* New releases */
 .new-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
 @media (max-width: 700px) { .new-grid { grid-template-columns: repeat(2, 1fr); } }
@@ -110,24 +60,6 @@ layout: default
 .new-card-img { width: 100%; height: 80px; object-fit: cover; display: block; background: var(--border); }
 .new-card-name { padding: 8px 10px; font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .new-card-price { padding: 0 10px 10px; font-size: 12px; color: var(--muted); }
-
-/* Daily challenge banner */
-.daily-banner {
-  display: flex; align-items: center; gap: 16px; padding: 20px 24px;
-  background: linear-gradient(135deg, #2d1a4e 0%, #1a1040 100%);
-  border: 1px solid #5865f2; border-radius: 14px; margin-bottom: 16px;
-  text-decoration: none; color: inherit;
-}
-.daily-banner:hover { border-color: #7c8af2; }
-.daily-banner-icon { font-size: 36px; flex-shrink: 0; }
-.daily-banner-info { flex: 1; }
-.daily-banner-title { font-size: 16px; font-weight: 700; color: #c7d5e0; margin-bottom: 4px; }
-.daily-banner-sub { font-size: 13px; color: #8a7ab5; }
-.daily-banner-btn {
-  background: #5865f2; color: #fff; border: none; border-radius: 8px;
-  padding: 10px 18px; font-size: 13px; font-weight: 700; cursor: pointer;
-  white-space: nowrap; flex-shrink: 0;
-}
 
 /* Email signup */
 .email-section {
@@ -225,28 +157,11 @@ layout: default
 <main>
 <div class="home-wrap">
 
-  <!-- HERO DEAL -->
-  <div id="hero-wrap">
-    <div class="home-skeleton" style="height:260px; margin-bottom:36px;"></div>
-  </div>
-
-  <!-- DEALS GRID -->
-  <div class="home-section">
-    <div class="home-section-header">
-      <div class="home-section-title">🔥 Одоогийн хямдрал</div>
-      <a class="home-see-all" href="{{ '/deals/' | relative_url }}">Бүгдийг харах →</a>
-    </div>
-    <div id="deals-grid" class="deals-grid">
-      {% for i in (1..6) %}
-      <div class="home-skeleton" style="height:170px;"></div>
-      {% endfor %}
-    </div>
-  </div>
-
   <!-- STEAM NEWS (Mongolian translated) -->
   <div class="home-section">
     <div class="home-section-header">
       <div class="home-section-title">📰 Steam мэдээ</div>
+      <a class="home-see-all" href="{{ '/news/' | relative_url }}">Бүгдийг харах →</a>
     </div>
     <div id="news-feed" class="news-feed">
       {% for i in (1..4) %}
@@ -254,26 +169,6 @@ layout: default
       {% endfor %}
     </div>
   </div>
-
-  <!-- DAILY CHALLENGE BANNER -->
-  <a class="daily-banner" href="{{ '/daily/' | relative_url }}">
-    <div class="daily-banner-icon">🎯</div>
-    <div class="daily-banner-info">
-      <div class="daily-banner-title">Өдрийн Challenge</div>
-      <div class="daily-banner-sub">Өдөр бүр шинэ gaming асуулт. Streak-ээ бүү алдаарай!</div>
-    </div>
-    <div class="daily-banner-btn">Тоглох →</div>
-  </a>
-
-  <!-- PROFILE BANNER -->
-  <a class="profile-banner" href="{{ '/steam/' | relative_url }}">
-    <div class="profile-banner-icon">🎮</div>
-    <div class="profile-banner-info">
-      <div class="profile-banner-title">Steam Профайл харах</div>
-      <div class="profile-banner-sub">Username эсвэл Steam ID оруулаад өөрийн тоглоомын статистик харна уу</div>
-    </div>
-    <div class="profile-banner-btn">Профайл →</div>
-  </a>
 
   <!-- TOP SELLERS -->
   <div class="home-section">
@@ -341,13 +236,10 @@ async function loadHome() {
     const res = await fetch(url)
     const data = await res.json()
 
-    renderHero(data.specials)
-    renderDeals(data.specials)
     renderSellers(data.topSellers)
     renderNew(data.newReleases)
   } catch(e) {
-    document.getElementById('hero-wrap').innerHTML = ''
-    document.getElementById('deals-grid').innerHTML = '<div style="color:var(--muted);grid-column:1/-1;text-align:center;padding:40px;">Steam дэлгүүрт холбогдож чадсангүй</div>'
+    console.error('Failed to load home data', e)
   }
 
   // Load Steam news (separate fetch, non-blocking)
@@ -432,48 +324,6 @@ function closeNewsModal(e) {
 }
 
 document.addEventListener('keydown', e => { if (e.key === 'Escape') { document.getElementById('news-modal-overlay').classList.remove('open'); document.body.style.overflow = '' } })
-
-function renderHero(specials) {
-  if (!specials || !specials.length) {
-    document.getElementById('hero-wrap').innerHTML = ''
-    return
-  }
-  const g = specials[0]
-  document.getElementById('hero-wrap').innerHTML = `
-    <a class="hero-deal" href="${storeUrl(g.appid)}" target="_blank" rel="noopener">
-      <img class="hero-deal-img" src="${g.image}" alt="${esc(g.name)}" onerror="this.style.display='none'">
-      <div class="hero-deal-overlay"></div>
-      <div class="hero-deal-body">
-        <div class="hero-deal-tag">⚡ Онцлох хямдрал</div>
-        <div class="hero-deal-name">${esc(g.name)}</div>
-        <div class="hero-deal-price">
-          <span class="deal-badge-lg">-${g.discountPct}%</span>
-          <span class="deal-orig-lg">$${(g.originalPrice/100).toFixed(2)}</span>
-          <span class="deal-final-lg">$${(g.finalPrice/100).toFixed(2)}</span>
-          <span class="hero-buy-btn">Steam дэлгүүр →</span>
-        </div>
-      </div>
-    </a>`
-}
-
-function renderDeals(specials) {
-  if (!specials || !specials.length) {
-    document.getElementById('deals-grid').innerHTML = '<div style="color:var(--muted);grid-column:1/-1;text-align:center;padding:20px;">Одоогоор идэвхтэй хямдрал байхгүй байна</div>'
-    return
-  }
-  document.getElementById('deals-grid').innerHTML = specials.slice(0, 6).map(g => `
-    <a class="deal-card" href="${storeUrl(g.appid)}" target="_blank" rel="noopener">
-      <img class="deal-card-img" src="${g.image}" alt="${esc(g.name)}" onerror="this.style.background='var(--border)'">
-      <div class="deal-card-body">
-        <div class="deal-card-name">${esc(g.name)}</div>
-        <div class="deal-card-price">
-          ${g.discountPct > 0 ? `<span class="deal-badge">-${g.discountPct}%</span>` : ''}
-          ${g.discountPct > 0 ? `<span class="deal-orig">$${(g.originalPrice/100).toFixed(2)}</span>` : ''}
-          ${g.finalPrice === 0 ? '<span class="deal-free">Үнэгүй</span>' : `<span class="deal-final">$${(g.finalPrice/100).toFixed(2)}</span>`}
-        </div>
-      </div>
-    </a>`).join('')
-}
 
 function renderSellers(sellers) {
   if (!sellers || !sellers.length) {
