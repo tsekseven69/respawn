@@ -14,6 +14,9 @@ layout: default
         {% if page.translated %}<span class="badge badge-purple" style="margin-left:auto;">🤖 Орчуулсан</span>{% endif %}
       </div>
     </div>
+    {% if page.image and page.image != "" %}
+    <div class="post-hero-img" style="background-image:url('{{ page.image }}');"></div>
+    {% endif %}
     <div class="post-content">
       {{ content }}
     </div>

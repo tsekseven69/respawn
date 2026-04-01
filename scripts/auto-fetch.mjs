@@ -90,7 +90,7 @@ ${body}`
 }
 
 // --- Jekyll пост бичих ---
-function writePost(translated, { slug, date, category, badge, sourceUrl }) {
+function writePost(translated, { slug, date, category, badge, sourceUrl, image }) {
   const thumbOptions = ['a', 'b', 'c', 'd', 'e', 'f']
   const thumb = thumbOptions[Math.floor(Math.random() * thumbOptions.length)]
   const time = `${date} 08:00:00 +0800`
@@ -102,6 +102,7 @@ date: ${time}
 category: ${category}
 badge: ${badge}
 thumb: ${thumb}
+image: "${image}"
 featured: false
 translated: true
 source_url: "${sourceUrl}"
@@ -115,9 +116,28 @@ ${translated.body}`
   return filename
 }
 
+// --- RSS-аас зураг авах ---
+function extractImage(item) {
+  return (
+    item['media:content']?.$.url ||
+    item['media:thumbnail']?.$.url ||
+    item.enclosure?.url ||
+    item['media:group']?.['media:content']?.[0]?.$.url ||
+    ''
+  )
+}
+
 // --- Main ---
 async function main() {
-  const parser = new Parser()
+  const parser = new Parser({
+    customFields: {
+      item: [
+        ['media:content',   'media:content',   { keepArray: false }],
+        ['media:thumbnail', 'media:thumbnail', { keepArray: false }],
+        ['media:group',     'media:group',     { keepArray: false }],
+      ]
+    }
+  })
   const existingSlugs = getExistingPosts()
   const newPosts = []
 
@@ -152,7 +172,8 @@ async function main() {
           date: today,
           category: source.category,
           badge: source.badge,
-          sourceUrl: item.link || ''
+          sourceUrl: item.link || '',
+          image: extractImage(item)
         })
         newPosts.push(filename)
         existingSlugs.add(slug)
