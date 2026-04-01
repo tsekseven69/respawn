@@ -2,11 +2,11 @@
   <a class="logo" href="{{ '/' | relative_url }}">Respawn<span>MN</span></a>
   <div class="nav-links">
     <a class="nav-link{% if page.url == '/' or page.url == '/index.html' %} active{% endif %}" href="{{ '/' | relative_url }}">Нүүр</a>
-    <a class="nav-link{% if page.url contains 'deals' %} active{% endif %}" href="{{ '/deals.html' | relative_url }}">🔥 Хямдрал</a>
-    <a class="nav-link{% if page.url contains 'daily' %} active{% endif %}" href="{{ '/daily.html' | relative_url }}">🎯 Daily</a>
-    <a class="nav-link{% if page.url contains 'meme' %} active{% endif %}" href="{{ '/meme.html' | relative_url }}">😂 Meme</a>
-    <a class="nav-link{% if page.url contains 'calendar' %} active{% endif %}" href="{{ '/calendar.html' | relative_url }}">📅 Хуанли</a>
-    <a class="nav-link{% if page.url contains 'steam' %} active{% endif %}" href="{{ '/steam.html' | relative_url }}">👤 Профайл</a>
+    <a class="nav-link{% if page.url contains 'deals' %} active{% endif %}" href="{{ '/deals/' | relative_url }}">🔥 Хямдрал</a>
+    <a class="nav-link{% if page.url contains 'daily' %} active{% endif %}" href="{{ '/daily/' | relative_url }}">🎯 Daily</a>
+    <a class="nav-link{% if page.url contains 'meme' %} active{% endif %}" href="{{ '/meme/' | relative_url }}">😂 Meme</a>
+    <a class="nav-link{% if page.url contains 'calendar' %} active{% endif %}" href="{{ '/calendar/' | relative_url }}">📅 Хуанли</a>
+    <a class="nav-link{% if page.url contains 'steam' %} active{% endif %}" href="{{ '/steam/' | relative_url }}">👤 Профайл</a>
   </div>
   <div class="nav-right">
     <button class="theme-btn" id="theme-btn" onclick="toggleTheme()" title="Өнгөний горим">☀️</button>
@@ -18,9 +18,9 @@
 
 <div class="mobile-menu" id="mobile-menu">
   <a class="nav-link{% if page.url == '/' or page.url == '/index.html' %} active{% endif %}" href="{{ '/' | relative_url }}">Нүүр</a>
-  <a class="nav-link{% if page.url contains 'deals' %} active{% endif %}" href="{{ '/deals.html' | relative_url }}">🔥 Хямдрал</a>
-  <a class="nav-link{% if page.url contains 'daily' %} active{% endif %}" href="{{ '/daily.html' | relative_url }}">🎯 Daily</a>
-  <a class="nav-link{% if page.url contains 'meme' %} active{% endif %}" href="{{ '/meme.html' | relative_url }}">😂 Meme</a>
-  <a class="nav-link{% if page.url contains 'calendar' %} active{% endif %}" href="{{ '/calendar.html' | relative_url }}">📅 Хуанли</a>
-  <a class="nav-link{% if page.url contains 'steam' %} active{% endif %}" href="{{ '/steam.html' | relative_url }}">👤 Профайл</a>
+  <a class="nav-link{% if page.url contains 'deals' %} active{% endif %}" href="{{ '/deals/' | relative_url }}">🔥 Хямдрал</a>
+  <a class="nav-link{% if page.url contains 'daily' %} active{% endif %}" href="{{ '/daily/' | relative_url }}">🎯 Daily</a>
+  <a class="nav-link{% if page.url contains 'meme' %} active{% endif %}" href="{{ '/meme/' | relative_url }}">😂 Meme</a>
+  <a class="nav-link{% if page.url contains 'calendar' %} active{% endif %}" href="{{ '/calendar/' | relative_url }}">📅 Хуанли</a>
+  <a class="nav-link{% if page.url contains 'steam' %} active{% endif %}" href="{{ '/steam/' | relative_url }}">👤 Профайл</a>
 </div>
