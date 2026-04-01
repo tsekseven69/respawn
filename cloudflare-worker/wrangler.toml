@@ -1,0 +1,7 @@
+name = "respawnmn-steam-api"
+main = "steam-api.js"
+compatibility_date = "2024-01-01"
+
+[vars]
+# STEAM_API_KEY-г secret-ээр тохируулна:
+# wrangler secret put STEAM_API_KEY

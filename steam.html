@@ -1,0 +1,206 @@
+---
+layout: default
+title: Steam Профайл
+---
+
+<style>
+.steam-wrap { max-width: 720px; margin: 0 auto; padding: 24px 16px; }
+.steam-search { display: flex; gap: 10px; margin-bottom: 32px; }
+.steam-input {
+  flex: 1; padding: 12px 16px; border-radius: 10px;
+  border: 1px solid var(--border); background: var(--card);
+  color: var(--text); font-size: 15px; outline: none;
+}
+.steam-input:focus { border-color: #5865f2; }
+.steam-btn {
+  padding: 12px 20px; border-radius: 10px; border: none;
+  background: #1b2838; color: #c7d5e0; font-size: 15px;
+  cursor: pointer; font-weight: 600; white-space: nowrap;
+  transition: background 0.2s;
+}
+.steam-btn:hover { background: #2a475e; }
+.steam-hint { font-size: 13px; color: var(--muted); margin-bottom: 28px; }
+
+/* Profile card */
+.s-profile { display: flex; gap: 20px; align-items: flex-start; margin-bottom: 28px; }
+.s-avatar { width: 88px; height: 88px; border-radius: 12px; border: 2px solid var(--border); flex-shrink: 0; }
+.s-info { flex: 1; }
+.s-name { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+.s-name a { color: var(--text); text-decoration: none; }
+.s-name a:hover { color: #5865f2; }
+.s-meta { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.s-level { background: #1b2838; color: #c7d5e0; padding: 3px 10px; border-radius: 20px; font-size: 13px; font-weight: 600; }
+.s-status { font-size: 13px; color: var(--muted); }
+.s-status.online { color: #57cbde; }
+.s-flag { font-size: 18px; }
+
+/* Stats row */
+.s-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 28px; }
+.s-stat { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; text-align: center; }
+.s-stat-val { font-size: 24px; font-weight: 700; color: var(--text); }
+.s-stat-label { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+/* Games list */
+.s-section-title { font-size: 16px; font-weight: 600; margin-bottom: 14px; color: var(--text); }
+.s-game { display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 10px; margin-bottom: 8px; background: var(--card); border: 1px solid var(--border); }
+.s-game-img { width: 40px; height: 40px; border-radius: 6px; object-fit: cover; background: var(--border); flex-shrink: 0; }
+.s-game-name { flex: 1; font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.s-game-hours { font-size: 13px; color: var(--muted); white-space: nowrap; flex-shrink: 0; }
+.s-bar-wrap { width: 80px; height: 4px; background: var(--border); border-radius: 2px; flex-shrink: 0; }
+.s-bar { height: 100%; background: #1b2838; border-radius: 2px; transition: width 0.4s; }
+
+/* Recent */
+.s-recent-game { display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 10px; margin-bottom: 8px; background: var(--card); border: 1px solid var(--border); }
+.s-2w { font-size: 12px; color: #57cbde; margin-left: 4px; }
+
+.s-error { background: #2d1b1b; border: 1px solid #5c2020; border-radius: 10px; padding: 16px; color: #e88; font-size: 14px; margin-bottom: 20px; }
+.s-loading { text-align: center; padding: 40px; color: var(--muted); font-size: 15px; }
+#steam-result { display: none; }
+</style>
+
+<main>
+  <div class="steam-wrap">
+    <h1 style="font-size:24px;font-weight:700;margin-bottom:8px;">🎮 Steam Профайл</h1>
+    <p class="steam-hint">Steam username эсвэл 17 оронтой Steam ID оруулна уу (жишээ: <code>gaben</code> эсвэл <code>76561197960287930</code>)</p>
+
+    <div class="steam-search">
+      <input class="steam-input" id="steam-id-input" type="text" placeholder="Steam username эсвэл Steam ID..." autocomplete="off" />
+      <button class="steam-btn" onclick="lookupSteam()">🔍 Хайх</button>
+    </div>
+
+    <div id="steam-error" style="display:none;"></div>
+    <div id="steam-loading" style="display:none;" class="s-loading">⏳ Уншиж байна...</div>
+    <div id="steam-result"></div>
+  </div>
+</main>
+
+<script>
+// Cloudflare Worker URL — deploy хийсний дараа солино
+const WORKER_URL = 'https://respawnmn-steam-api.tsekseven69.workers.dev'
+
+async function lookupSteam() {
+  const input = document.getElementById('steam-id-input').value.trim()
+  if (!input) return
+
+  showLoading(true)
+  clearError()
+  document.getElementById('steam-result').style.display = 'none'
+
+  try {
+    let steamid = input
+
+    // Vanity URL бол эхлээд resolve хийнэ
+    if (!/^\d{17}$/.test(input)) {
+      const r = await apiFetch('resolve', { vanity: input })
+      if (r.success !== 1) {
+        showError('Steam username олдсонгүй. 17 оронтой Steam ID оруулж үзнэ үү.')
+        return
+      }
+      steamid = r.steamid
+    }
+
+    // Profile + games + recent зэрэг татна
+    const [profile, games, recent] = await Promise.all([
+      apiFetch('profile', { steamid }),
+      apiFetch('games', { steamid }),
+      apiFetch('recent', { steamid }),
+    ])
+
+    if (profile.error) { showError(profile.error); return }
+
+    renderProfile(profile, games, recent)
+  } catch (e) {
+    showError('Холболтын алдаа. Worker URL тохируулагдсан эсэхийг шалгана уу.')
+  } finally {
+    showLoading(false)
+  }
+}
+
+async function apiFetch(action, params) {
+  const url = new URL(WORKER_URL)
+  url.searchParams.set('action', action)
+  for (const [k, v] of Object.entries(params)) url.searchParams.set(k, v)
+  const res = await fetch(url)
+  return res.json()
+}
+
+function renderProfile(p, g, r) {
+  const maxHours = g.games?.[0]?.hours || 1
+  const statusClass = p.status === 'Online' ? 'online' : ''
+  const statusMn = { 'Online': '🟢 Онлайн', 'Offline': '⚫ Офлайн', 'Away': '🟡 Идэвхгүй', 'Busy': '🔴 Завгүй' }
+  const flag = p.country ? countryFlag(p.country) : ''
+
+  const gamesHtml = (g.games || []).map(game => {
+    const pct = Math.round((game.hours / maxHours) * 100)
+    return `
+    <div class="s-game">
+      <img class="s-game-img" src="${game.img}" alt="${esc(game.name)}" onerror="this.style.background='var(--border)';this.src=''">
+      <div class="s-game-name">${esc(game.name)}</div>
+      <div class="s-bar-wrap"><div class="s-bar" style="width:${pct}%;"></div></div>
+      <div class="s-game-hours">${game.hours}h</div>
+    </div>`
+  }).join('')
+
+  const recentHtml = (r.games || []).map(game => `
+    <div class="s-recent-game">
+      <img class="s-game-img" src="${game.img}" alt="${esc(game.name)}" onerror="this.style.background='var(--border)';this.src=''">
+      <div class="s-game-name">${esc(game.name)}</div>
+      <div class="s-game-hours">${game.hoursTotal}h нийт<span class="s-2w">↑${game.hours2weeks}h/7 хоног</span></div>
+    </div>`
+  ).join('') || '<div style="color:var(--muted);font-size:14px;">Сүүлийн 2 долоо хоногт тоглоогүй</div>'
+
+  const memberSince = p.created ? new Date(p.created * 1000).getFullYear() : '?'
+
+  document.getElementById('steam-result').innerHTML = `
+    <div class="s-profile">
+      <img class="s-avatar" src="${p.avatar}" alt="avatar">
+      <div class="s-info">
+        <div class="s-name"><a href="${p.profileUrl}" target="_blank" rel="noopener">${esc(p.name)}</a></div>
+        <div class="s-meta">
+          <span class="s-level">⭐ Level ${p.level}</span>
+          <span class="s-status ${statusClass}">${statusMn[p.status] || p.status}</span>
+          ${flag ? `<span class="s-flag">${flag}</span>` : ''}
+        </div>
+      </div>
+    </div>
+
+    <div class="s-stats">
+      <div class="s-stat">
+        <div class="s-stat-val">${(g.total || 0).toLocaleString()}</div>
+        <div class="s-stat-label">Нийт тоглоом</div>
+      </div>
+      <div class="s-stat">
+        <div class="s-stat-val">${(g.totalHours || 0).toLocaleString()}</div>
+        <div class="s-stat-label">Нийт цаг</div>
+      </div>
+      <div class="s-stat">
+        <div class="s-stat-val">${memberSince}</div>
+        <div class="s-stat-label">Гишүүн болсон</div>
+      </div>
+    </div>
+
+    ${r.games?.length ? `
+    <div class="s-section-title">🕐 Сүүлд тоглосон</div>
+    ${recentHtml}
+    <div style="margin-bottom:28px;"></div>` : ''}
+
+    ${g.games?.length ? `
+    <div class="s-section-title">🏆 Хамгийн их тоглосон тоглоомууд</div>
+    ${gamesHtml}` : ''}
+  `
+  document.getElementById('steam-result').style.display = 'block'
+}
+
+function countryFlag(code) {
+  if (!code || code.length !== 2) return ''
+  return code.toUpperCase().replace(/./g, c => String.fromCodePoint(127397 + c.charCodeAt(0)))
+}
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
+function showLoading(v) { document.getElementById('steam-loading').style.display = v ? 'block' : 'none' }
+function showError(msg) { const el = document.getElementById('steam-error'); el.innerHTML = `<div class="s-error">❌ ${msg}</div>`; el.style.display = 'block' }
+function clearError() { const el = document.getElementById('steam-error'); el.style.display = 'none'; el.innerHTML = '' }
+
+document.getElementById('steam-id-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') lookupSteam()
+})
+</script>
