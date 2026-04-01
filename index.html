@@ -150,6 +150,37 @@ layout: default
 .email-submit:hover { background: #5d7f2a; }
 .email-ok { color: #a4d007; font-size: 13px; margin-top: 10px; display: none; }
 
+/* Steam News */
+.news-feed { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+@media (max-width: 600px) { .news-feed { grid-template-columns: 1fr; } }
+
+.news-item {
+  background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+  overflow: hidden; text-decoration: none; color: inherit; display: block;
+  transition: border-color 0.2s, transform 0.15s;
+}
+.news-item:hover { border-color: #5865f2; transform: translateY(-2px); }
+.news-item-img {
+  width: 100%; height: 120px; object-fit: cover; display: block; background: var(--border);
+}
+.news-item-body { padding: 12px 14px; }
+.news-item-title { font-size: 14px; font-weight: 700; line-height: 1.4; margin-bottom: 6px; color: var(--text);
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.news-item-desc {
+  font-size: 12px; color: var(--muted); line-height: 1.5; margin-bottom: 8px;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.news-item-footer { display: flex; align-items: center; justify-content: space-between; }
+.news-item-date { font-size: 11px; color: var(--muted); }
+.news-item-orig { font-size: 11px; color: rgba(255,255,255,0.25); font-style: italic;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 60%;
+}
+.news-item-no-img {
+  height: 120px; display: flex; align-items: center; justify-content: center;
+  font-size: 40px; background: linear-gradient(135deg, #1b2838, #2a475e);
+}
+
 .home-skeleton { background: var(--border); border-radius: 12px; animation: pulse 1.5s ease-in-out infinite; }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
 .home-loading { text-align: center; padding: 60px; color: var(--muted); }
@@ -172,6 +203,18 @@ layout: default
     <div id="deals-grid" class="deals-grid">
       {% for i in (1..6) %}
       <div class="home-skeleton" style="height:170px;"></div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- STEAM NEWS (Mongolian translated) -->
+  <div class="home-section">
+    <div class="home-section-header">
+      <div class="home-section-title">📰 Steam мэдээ</div>
+    </div>
+    <div id="news-feed" class="news-feed">
+      {% for i in (1..4) %}
+      <div class="home-skeleton" style="height:220px;"></div>
       {% endfor %}
     </div>
   </div>
@@ -262,6 +305,52 @@ async function loadHome() {
     document.getElementById('hero-wrap').innerHTML = ''
     document.getElementById('deals-grid').innerHTML = '<div style="color:var(--muted);grid-column:1/-1;text-align:center;padding:40px;">Steam дэлгүүрт холбогдож чадсангүй</div>'
   }
+
+  // Load Steam news (separate fetch, non-blocking)
+  loadNews()
+}
+
+async function loadNews() {
+  try {
+    const url = new URL(WORKER_URL)
+    url.searchParams.set('action', 'steamnews')
+    const res = await fetch(url)
+    const data = await res.json()
+    renderNews(data.news || [])
+  } catch(e) {
+    document.getElementById('news-feed').innerHTML = '<div style="color:var(--muted);grid-column:1/-1;text-align:center;padding:20px;">Мэдээ ачааллагдсангүй</div>'
+  }
+}
+
+function renderNews(news) {
+  const feed = document.getElementById('news-feed')
+  if (!news.length) {
+    feed.innerHTML = '<div style="color:var(--muted);grid-column:1/-1;text-align:center;padding:20px;">Мэдээ байхгүй байна</div>'
+    return
+  }
+
+  feed.innerHTML = news.slice(0, 6).map(n => {
+    const date = n.date ? new Date(n.date).toLocaleDateString('mn-MN', { month: 'short', day: 'numeric' }) : ''
+    const title = esc(n.titleMn || n.title)
+    const desc = esc(n.descMn || n.description || '')
+    const orig = esc(n.title || '')
+    const imgHtml = n.image
+      ? `<img class="news-item-img" src="${n.image}" alt="" onerror="this.outerHTML='<div class=\\'news-item-no-img\\'>📰</div>'">`
+      : `<div class="news-item-no-img">📰</div>`
+
+    return `
+    <a class="news-item" href="${n.link || '#'}" target="_blank" rel="noopener">
+      ${imgHtml}
+      <div class="news-item-body">
+        <div class="news-item-title">${title}</div>
+        <div class="news-item-desc">${desc}</div>
+        <div class="news-item-footer">
+          <span class="news-item-date">${date}</span>
+          <span class="news-item-orig">${orig}</span>
+        </div>
+      </div>
+    </a>`
+  }).join('')
 }
 
 function renderHero(specials) {
