@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RespawnMN — Монгол Gaming Сайт</title>
+</head>
+<body>
+
+<nav>
+  <div class="logo">Respawn<span>MN</span></div>
+  <div class="nav-links">
+    <button class="nav-link active" onclick="setActive(this)">Мэдээ</button>
+    <button class="nav-link" onclick="setActive(this)">Quiz</button>
+    <button class="nav-link" onclick="setActive(this)">Meme</button>
+    <button class="nav-link" onclick="setActive(this)">Review</button>
+    <button class="nav-link" onclick="setActive(this)">Esports</button>
+  </div>
+  <div class="nav-right">
+    <input class="search" type="text" placeholder="🔍  Хайх...">
+    <div class="notif-btn">🔔</div>
+  </div>
+</nav>
+
+<main>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-main">
+      <div class="hero-img">
+        <div style="position:relative;">
+          <div class="hero-badge">🔥 Онцлох</div>
+          <div class="hero-title">GTA VI — Монгол геймерүүдэд юу санагдав?</div>
+          <div class="hero-sub">Дэлхийн хамгийн их хүлээгдсэн тоглоом эцэст нь гарлаа</div>
+        </div>
+      </div>
+      <div class="hero-meta">
+        <span class="badge badge-blue">Мэдээ</span>
+        <span class="badge badge-purple">Quiz бий</span>
+        <span class="time-text" style="margin-left:auto">2 цагийн өмнө</span>
+      </div>
+    </div>
+
+    <div class="sidebar">
+      <div class="side-label">Trending</div>
+      <div class="side-card">
+        <div class="side-thumb side-thumb-a"></div>
+        <div class="side-info">
+          <div class="side-title">Elden Ring DLC — Worth it үү?</div>
+          <div class="side-meta">
+            <span class="badge badge-blue">Review</span>
+            <span class="time-text">5 цаг</span>
+          </div>
+        </div>
+      </div>
+      <div class="side-card">
+        <div class="side-thumb side-thumb-b"></div>
+        <div class="side-info">
+          <div class="side-title">Steam хямдрал — ямар тоглоом авах вэ?</div>
+          <div class="side-meta">
+            <span class="badge badge-green">Зөвлөгөө</span>
+            <span class="time-text">8 цаг</span>
+          </div>
+        </div>
+      </div>
+      <div class="side-card">
+        <div class="side-thumb side-thumb-c"></div>
+        <div class="side-info">
+          <div class="side-title">Valorant — Монгол server нээгдэх үү?</div>
+          <div class="side-meta">
+            <span class="badge badge-red">Esports</span>
+            <span class="time-text">12 цаг</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NEWS -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">Сүүлийн мэдээнүүд</div>
+      <div class="see-all">Бүгдийг харах →</div>
+    </div>
+    <div class="news-grid">
+      <div class="news-card">
+        <div class="news-thumb news-thumb-a"></div>
+        <div class="news-body">
+          <div class="news-title">Cyberpunk 2077 шинэ major update гарлаа — юу өөрчлөгдөв?</div>
+          <div class="news-footer">
+            <span class="badge badge-blue">Мэдээ</span>
+            <span class="time-text">1 өдөр</span>
+          </div>
+        </div>
+      </div>
+      <div class="news-card">
+        <div class="news-thumb news-thumb-b"></div>
+        <div class="news-body">
+          <div class="news-title">2025-ийн хамгийн сайн RPG тоглоомуудын жагсаалт</div>
+          <div class="news-footer">
+            <span class="badge badge-green">Top list</span>
+            <span class="time-text">2 өдөр</span>
+          </div>
+        </div>
+      </div>
+      <div class="news-card">
+        <div class="news-thumb news-thumb-c"></div>
+        <div class="news-body">
+          <div class="news-title">PC vs Console — Монголд ямар нь хямд байдаг вэ?</div>
+          <div class="news-footer">
+            <span class="badge badge-blue">Зөвлөгөө</span>
+            <span class="time-text">3 өдөр</span>
+          </div>
+        </div>
+      </div>
+      <div class="news-card">
+        <div class="news-thumb news-thumb-d"></div>
+        <div class="news-body">
+          <div class="news-title">Minecraft 2025 — Шинэ biome, mob бүгдийг нь авч үзлээ</div>
+          <div class="news-footer">
+            <span class="badge badge-green">Review</span>
+            <span class="time-text">4 өдөр</span>
+          </div>
+        </div>
+      </div>
+      <div class="news-card">
+        <div class="news-thumb news-thumb-e"></div>
+        <div class="news-body">
+          <div class="news-title">Free to play тоглоомд мөнгө зарцуулах нь зөв үү?</div>
+          <div class="news-footer">
+            <span class="badge badge-purple">Нийтлэл</span>
+            <span class="time-text">5 өдөр</span>
+          </div>
+        </div>
+      </div>
+      <div class="news-card">
+        <div class="news-thumb news-thumb-f"></div>
+        <div class="news-body">
+          <div class="news-title">Gaming chair vs Энгийн сандал — Монгол геймерийн туршлага</div>
+          <div class="news-footer">
+            <span class="badge badge-blue">Зөвлөгөө</span>
+            <span class="time-text">6 өдөр</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUIZ BANNER -->
+  <div class="quiz-banner">
+    <div class="quiz-icon">🎮</div>
+    <div class="quiz-info">
+      <div class="qt">Чи ямар төрлийн геймер вэ?</div>
+      <div class="qs">5 асуулт · 50,000+ хүн тоглосон · 2 минут</div>
+    </div>
+    <button class="quiz-play">Тоглох →</button>
+  </div>
+
+  <!-- MEME -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">Gaming Meme</div>
+      <div class="see-all">Бүгдийг харах →</div>
+    </div>
+    <div class="meme-grid">
+      <div class="meme-card">
+        <div class="meme-thumb meme-thumb-a">🌙</div>
+        <div class="meme-body">
+          <div class="meme-title">Шөнийн 2 цагт "нэг дор дуусгана" гэж байсан чинь...</div>
+          <div class="meme-footer">
+            <button class="like-btn" onclick="like(this)">❤️ <span>1.2к</span></button>
+            <span class="time-text">2 цаг</span>
+          </div>
+        </div>
+      </div>
+      <div class="meme-card">
+        <div class="meme-thumb meme-thumb-b">💸</div>
+        <div class="meme-body">
+          <div class="meme-title">Steam хямдрал vs Хоолны мөнгө</div>
+          <div class="meme-footer">
+            <button class="like-btn" onclick="like(this)">❤️ <span>3.4к</span></button>
+            <span class="time-text">5 цаг</span>
+          </div>
+        </div>
+      </div>
+      <div class="meme-card">
+        <div class="meme-thumb meme-thumb-c">😤</div>
+        <div class="meme-body">
+          <div class="meme-title">Solo queue-д орох үеийн сэтгэлзүй</div>
+          <div class="meme-footer">
+            <button class="like-btn" onclick="like(this)">❤️ <span>891</span></button>
+            <span class="time-text">8 цаг</span>
+          </div>
+        </div>
+      </div>
+      <div class="meme-card">
+        <div class="meme-thumb meme-thumb-d">🏆</div>
+        <div class="meme-body">
+          <div class="meme-title">Achievement unlock хийхэд гэр бүлийн хүн харах</div>
+          <div class="meme-footer">
+            <button class="like-btn" onclick="like(this)">❤️ <span>2.1к</span></button>
+            <span class="time-text">1 өдөр</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ESPORTS -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">Esports мэдээ</div>
+      <div class="see-all">Бүгдийг харах →</div>
+    </div>
+    <div class="esports-grid">
+      <div class="esport-card">
+        <div class="esport-icon" style="background:#1a1020;">🎯</div>
+        <div class="esport-info">
+          <div class="et">Valorant Champions Tour 2025</div>
+          <div class="es"><span class="live-dot"></span>Live · Pacific Division</div>
+        </div>
+      </div>
+      <div class="esport-card">
+        <div class="esport-icon" style="background:#0d1a10;">⚔️</div>
+        <div class="esport-info">
+          <div class="et">Монгол CS2 тэмцээн эхэллээ</div>
+          <div class="es">Бүртгэл хүлээж байна · 32 баг</div>
+        </div>
+      </div>
+      <div class="esport-card">
+        <div class="esport-icon" style="background:#1a1508;">🔫</div>
+        <div class="esport-info">
+          <div class="et">PUBG Mobile World Cup 2025</div>
+          <div class="es">Монголын баг тэргүүнд · Top 3</div>
+        </div>
+      </div>
+      <div class="esport-card">
+        <div class="esport-icon" style="background:#0d1520;">🏅</div>
+        <div class="esport-info">
+          <div class="et">Dota 2 — TI 2025 qualifier</div>
+          <div class="es">3 өдрийн дараа · Бүртгэл нээлттэй</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <div class="footer-logo">Respawn<span>MN</span></div>
+  <div class="footer-text">Монгол геймерүүдийн мэдээ, meme, quiz нэг дор</div>
+  <div class="footer-links">
+    <span class="footer-link">Бидний тухай</span>
+    <span class="footer-link">Холбоо барих</span>
+    <span class="footer-link">Нууцлалын бодлого</span>
+    <span class="footer-link">Facebook</span>
+    <span class="footer-link">Discord</span>
+  </div>
+</footer>
+
+<script type="module" src="/src/main.ts"></script>
+</body>
+</html>
